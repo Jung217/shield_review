@@ -36,6 +36,10 @@ function render(s, tracks) {
   reel.appendChild(slideOutro(s));
 
   root.appendChild(reel);
+  // Flag the page so CSS can lock body-scroll and make nav fixed —
+  // otherwise on mobile body + reel both scroll, snap misaligns,
+  // and currentSlideIndex() reads 0.
+  document.body.classList.add('reel-mode');
 
   // Init mini-maps once they're in DOM
   initMiniMap('mini-fast', s.fastestTrack, '#ff5a36');
@@ -44,6 +48,9 @@ function render(s, tracks) {
 
   addSaveFab();
 }
+
+const IS_MOBILE =
+  /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth < 700;
 
 // ============ SAVE AS IMAGE ============
 
@@ -117,22 +124,27 @@ function currentSlideIndex() {
   return best;
 }
 
-const H2C_OPTS = {
-  backgroundColor: '#0a0a0f',
-  scale: 2,
-  useCORS: true,
-  allowTaint: false,
-  logging: false,
-  // Only the cloned DOM is mutated, so the live page never flickers.
-  // html2canvas can't render `background-clip: text`, which would turn our
-  // gradient numbers into solid rectangles. We flatten those to a plain color
-  // *inline* (class-based CSS sometimes loses specificity fights inside the
-  // clone), and also hide chrome like the FAB and nav.
-  onclone(clonedDoc) {
-    clonedDoc.body.classList.add('capturing');
-    flattenForCapture(clonedDoc);
-  },
-};
+// Base options. Scale is per-call because "save all" stitches 12 slides into
+// one tall canvas and iOS Safari caps canvas area near 16 Mpx.
+function h2cOpts(scale) {
+  return {
+    backgroundColor: '#0a0a0f',
+    scale,
+    useCORS: true,
+    allowTaint: false,
+    logging: false,
+    // Only the cloned DOM is mutated, so the live page never flickers.
+    // html2canvas can't render `background-clip: text`, which would turn our
+    // gradient numbers into solid rectangles. We flatten those to a plain color
+    // *inline* (class-based CSS sometimes loses specificity fights inside the
+    // clone), and also hide chrome like the FAB and nav.
+    onclone(clonedDoc) {
+      clonedDoc.body.classList.add('capturing');
+      clonedDoc.body.classList.remove('reel-mode');
+      flattenForCapture(clonedDoc);
+    },
+  };
+}
 
 function flattenForCapture(doc) {
   doc.querySelectorAll('.save-fab, .scroll-hint, .nav').forEach(n => {
@@ -166,7 +178,8 @@ async function saveCurrentSlide() {
   const slide = slides[idx];
   if (!slide) throw new Error('找不到卡片');
 
-  const canvas = await html2canvas(slide, H2C_OPTS);
+  const scale = IS_MOBILE ? 1.5 : 2;
+  const canvas = await html2canvas(slide, h2cOpts(scale));
   await downloadCanvas(canvas, `shield-review-${String(idx+1).padStart(2,'0')}.png`);
 }
 
@@ -175,9 +188,18 @@ async function saveAllSlides() {
   const slides = Array.from(document.querySelectorAll('.slide'));
   if (slides.length === 0) throw new Error('沒有卡片');
 
+  // iOS Safari caps canvas area ~16 Mpx. A 400-wide phone × 12 slides × ~900
+  // tall × scale 2 = ~17 Mpx and fails silently. Pick scale so the final
+  // stitched canvas stays under ~14 Mpx.
+  const slideW = slides[0].offsetWidth;
+  const slideH = slides.reduce((s, el) => s + el.offsetHeight, 0);
+  const MAX_AREA = 14_000_000;
+  const naturalArea = slideW * slideH;
+  const scale = Math.min(IS_MOBILE ? 1.5 : 2, Math.sqrt(MAX_AREA / naturalArea));
+
   const canvases = [];
   for (const slide of slides) {
-    const c = await html2canvas(slide, H2C_OPTS);
+    const c = await html2canvas(slide, h2cOpts(scale));
     canvases.push(c);
   }
   const W = canvases[0].width;
