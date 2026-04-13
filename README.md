@@ -1,11 +1,11 @@
 # Shield Review
 
+> 緣起，看到手機會出的紀錄，想起原本想搞這個，僅此
+
 把 RunningFree 匯出的 GPX 軌跡壓縮檔變成一份 Spotify Wrapped 風格的回顧。
 **純前端、純靜態、零伺服器** — 紀錄完全留在你的瀏覽器。
 
 [Try it !](https://jung217.github.io/shield_review/)
-
----
 
 ## 它能做什麼
 
@@ -22,8 +22,7 @@ cd docs
 python3 -m http.server 8765
 ```
 
-開 [http://localhost:8765](http://localhost:8765)，按「載入示範資料」就會跑 demo（19.5 MB 的 zip，內含 369 條軌跡）。
-
+> 開 [http://localhost:8765](http://localhost:8765)，按「載入示範資料」就會跑 demo（19.5 MB 的 zip，內含 369 條軌跡）。
 
 
 ## 專案結構
