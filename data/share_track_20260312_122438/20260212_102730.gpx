@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<gpx xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:agt="http://www.inmirai.com/xmlschemas/TracklogExtension/v1" version="1.0" creator="RunningFree" xmlns="http://www.topografix.com/GPX/1/0">
+<trk>
+    <trkseg>
+        <trkpt lat="25.11265003" lon="121.6870413">
+            <ele>119</ele>
+            <time>2026-02-12T02:27:31Z</time>
+            <speed>106.1</speed>
+            <course>218.3</course>
+            <hdop>2.6</hdop>
+            <vdop>3.0</vdop>
+        </trkpt>
+        <trkpt lat="25.11261252" lon="121.68696921">
+            <ele>114</ele>
+            <time>2026-02-12T02:27:32Z</time>
+            <speed>106.1</speed>
+            <course>218.1</course>
+            <hdop>2.3</hdop>
+            <vdop>2.8</vdop>
+        </trkpt>
+        <trkpt lat="25.11239074" lon="121.68676612">
+            <ele>111</ele>
+            <time>2026-02-12T02:27:33Z</time>
+            <speed>106.2</speed>
+            <course>217.6</course>
+            <hdop>2.3</hdop>
+            <vdop>2.4</vdop>
+        </trkpt>
+        <trkpt lat="25.11223869" lon="121.6866196">
+            <ele>112</ele>
+            <time>2026-02-12T02:27:34Z</time>
+            <speed>105.9</speed>
+            <course>215.9</course>
+            <hdop>1.1</hdop>
+            <vdop>1.2</vdop>
+        </trkpt>
+        <trkpt lat="25.1119962" lon="121.68641525">
+            <ele>110</ele>
+            <time>2026-02-12T02:27:35Z</time>
+            <speed>101.7</speed>
+            <course>214.3</course>
+            <hdop>0.8</hdop>
+            <vdop>0.8</vdop>
+        </trkpt>
+        <trkpt lat="25.11177504" lon="121.68626346">
+            <ele>111</ele>
+            <time>2026-02-12T02:27:36Z</time>
+            <speed>97.2</speed>
+            <course>213.4</course>
+            <hdop>0.7</hdop>
+            <vdop>0.6</vdop>
+        </trkpt>
+        <trkpt lat="25.11157254" lon="121.68612096">
+            <ele>111</ele>
+            <time>2026-02-12T02:27:37Z</time>
+            <speed>95.2</speed>
+            <course>212.4</course>
+            <hdop>0.6</hdop>
+            <vdop>0.6</vdop>
+        </trkpt>
+    </trkseg>
+</trk>
+<metadata>
+    <name>20260212_102730.trk</name>
+    <desc>version=2</desc>
+    <extensions>
+        <agt:ckm>8807d4355c103a5176d0d0fa29a11e45</agt:ckm>
+    </extensions>
+</metadata>
+</gpx>
