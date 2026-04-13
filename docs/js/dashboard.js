@@ -1,0 +1,346 @@
+// Render the Wrapped-style dashboard from the cached session.
+
+import { loadSession } from './storage.js';
+import {
+  computeSummary, fmtKm, fmtKmFull, fmtDuration, fmtSpeed,
+  fmtTimeOfDay, fmtDate, fmtDateTime,
+} from './stats.js';
+
+const root = document.getElementById('root');
+const empty = document.getElementById('empty');
+
+(async function init() {
+  const session = await loadSession();
+  if (!session || !session.tracks || session.tracks.length === 0) return;
+
+  empty.remove();
+  // Recompute (cheap) so we don't depend on what was cached
+  const s = session.meta?.summary || computeSummary(session.tracks);
+  render(s, session.tracks);
+})();
+
+function render(s, tracks) {
+  const wrapped = el('div', 'wrapped');
+
+  wrapped.appendChild(slideHero(s));
+  wrapped.appendChild(slideDistance(s));
+  wrapped.appendChild(slideTime(s));
+  wrapped.appendChild(slideRides(s));
+  wrapped.appendChild(slideHours(s));
+  wrapped.appendChild(slideDow(s));
+  wrapped.appendChild(slideMonths(s));
+  wrapped.appendChild(slideFastest(s));
+  wrapped.appendChild(slideLongest(s));
+  wrapped.appendChild(slideEarlyLate(s));
+  wrapped.appendChild(slideTerritory(s));
+  wrapped.appendChild(slideOutro(s));
+
+  root.appendChild(wrapped);
+
+  // Init mini-maps once they're in DOM
+  initMiniMap('mini-fast', s.fastestTrack, '#ff5a36');
+  initMiniMap('mini-long', s.longestTrack, '#ffb84d');
+  initTerritoryMap('mini-territory', tracks, s.bbox);
+}
+
+// ============ SLIDES ============
+
+function slideHero(s) {
+  const slide = el('section', 'slide tinted-1');
+  const start = s.dateRange.start ? fmtDate(s.dateRange.start) : '';
+  const end = s.dateRange.end ? fmtDate(s.dateRange.end) : '';
+  slide.innerHTML = `
+    <div class="slide-inner">
+      <div class="eyebrow">Shield · Review</div>
+      <h2>你的<br><span style="background:linear-gradient(135deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent">${escapeHtml(start)} → ${escapeHtml(end)}</span><br>軌跡回顧</h2>
+      <p class="sub">這份回顧涵蓋 ${s.dateRange.spanDays ?? '?'} 天，${s.trackCount} 條軌跡。</p>
+    </div>
+    <div class="scroll-hint">↓ 滑動看故事</div>
+  `;
+  return slide;
+}
+
+function slideDistance(s) {
+  const slide = el('section', 'slide tinted-2');
+  slide.innerHTML = `
+    <div class="slide-inner">
+      <div class="eyebrow">總里程</div>
+      <h2>你跑了</h2>
+      <div class="big-num">${fmtKm(s.totalDistance)}<span class="unit">km</span></div>
+      <p class="sub">大約等於 ${roundEarthFraction(s.totalDistance)}</p>
+    </div>
+    <div class="scroll-hint">↓</div>
+  `;
+  return slide;
+}
+
+function slideTime(s) {
+  const slide = el('section', 'slide tinted-3');
+  slide.innerHTML = `
+    <div class="slide-inner">
+      <div class="eyebrow">總時數</div>
+      <h2>在路上</h2>
+      <div class="big-num">${(s.totalDuration/3600).toFixed(0)}<span class="unit">小時</span></div>
+      <p class="sub">扣掉停等：實際移動 ${fmtDuration(s.totalMovingTime)}</p>
+      <div class="kv-row">
+        <div class="kv"><div class="v">${(s.totalElevationGain/1000).toFixed(1)} km</div><div class="k">總爬升</div></div>
+        <div class="kv"><div class="v">${(s.totalPoints/1000).toFixed(0)}k</div><div class="k">GPS 點數</div></div>
+      </div>
+    </div>
+    <div class="scroll-hint">↓</div>
+  `;
+  return slide;
+}
+
+function slideRides(s) {
+  const slide = el('section', 'slide tinted-4');
+  const streakRange = s.longestStreakRange
+    ? `${fmtDate(s.longestStreakRange.start)} → ${fmtDate(s.longestStreakRange.end)}`
+    : '';
+  slide.innerHTML = `
+    <div class="slide-inner">
+      <div class="eyebrow">出門次數</div>
+      <h2>你出門了</h2>
+      <div class="big-num">${s.trackCount}<span class="unit">趟</span></div>
+      <div class="kv-row">
+        <div class="kv"><div class="v">${s.daysActive}</div><div class="k">出門天數</div></div>
+        <div class="kv"><div class="v">${s.longestStreak}</div><div class="k">連續紀錄</div></div>
+      </div>
+      <p class="sub">${streakRange ? `最長連續：${streakRange}` : ''}</p>
+    </div>
+    <div class="scroll-hint">↓</div>
+  `;
+  return slide;
+}
+
+function slideHours(s) {
+  const slide = el('section', 'slide tinted-5');
+  const max = Math.max(...s.byHour);
+  const cells = s.byHour.map((c, h) => {
+    const ratio = max ? c / max : 0;
+    const bg = `rgba(255, 90, 54, ${0.08 + ratio * 0.92})`;
+    return `<div class="cell" style="background:${bg}" title="${h}:00 — ${c} 趟"></div>`;
+  }).join('');
+  const labels = Array.from({length:24}, (_,i)=>i)
+    .map(i => i % 3 === 0 ? `<span>${i}</span>` : `<span></span>`)
+    .join('');
+
+  slide.innerHTML = `
+    <div class="slide-inner">
+      <div class="eyebrow">時間分布</div>
+      <h2>你最常 <span style="color:var(--accent)">${String(s.peakHour).padStart(2,'0')}:00</span> 出門</h2>
+      <div class="heatmap h24">${cells}</div>
+      <div class="hour-labels">${labels}</div>
+      <p class="sub">深色 = 那個鐘頭出發的趟數最多</p>
+    </div>
+    <div class="scroll-hint">↓</div>
+  `;
+  return slide;
+}
+
+function slideDow(s) {
+  const slide = el('section', 'slide tinted-2');
+  const max = Math.max(...s.byDow);
+  const bars = s.byDow.map((c, i) => {
+    const h = max ? Math.round((c / max) * 100) : 0;
+    return `
+      <div class="day">
+        <div class="bar"><div class="fill" style="height:${h}%"></div></div>
+        <div class="lbl">週${s.labels.dow[i]}</div>
+        <div class="v">${c}</div>
+      </div>
+    `;
+  }).join('');
+  slide.innerHTML = `
+    <div class="slide-inner">
+      <div class="eyebrow">星期分布</div>
+      <h2>最常出門的是<br><span style="color:var(--accent)">週${s.labels.dow[s.peakDow]}</span></h2>
+      <div class="dow-bars">${bars}</div>
+    </div>
+    <div class="scroll-hint">↓</div>
+  `;
+  return slide;
+}
+
+function slideMonths(s) {
+  const slide = el('section', 'slide tinted-3');
+  const months = Object.keys(s.byMonth).sort();
+  const max = Math.max(...months.map(m => s.byMonth[m].distance), 1);
+  const bars = months.map(m => {
+    const data = s.byMonth[m];
+    const h = Math.round((data.distance / max) * 100);
+    const label = m.slice(2).replace('-', '/');
+    return `
+      <div class="bar" style="height:${h}%" title="${m}: ${fmtKmFull(data.distance)}">
+        <div class="lbl">${label}</div>
+      </div>
+    `;
+  }).join('');
+  slide.innerHTML = `
+    <div class="slide-inner bars-wrap">
+      <div class="eyebrow">月度趨勢</div>
+      <h2>每個月的里程</h2>
+      <div class="bars">${bars}</div>
+      <p class="sub">柱高 = 該月總公里數</p>
+    </div>
+    <div class="scroll-hint">↓</div>
+  `;
+  return slide;
+}
+
+function slideFastest(s) {
+  const slide = el('section', 'slide tinted-1');
+  const t = s.fastestTrack;
+  slide.innerHTML = `
+    <div class="slide-inner">
+      <div class="eyebrow">最快一刻</div>
+      <h2>最高速度</h2>
+      <div class="big-num">${t.maxSpeed.toFixed(0)}<span class="unit">km/h</span></div>
+      <p class="sub">${fmtDateTime(t.startTime)}</p>
+      <div class="mini-map" id="mini-fast"></div>
+    </div>
+    <div class="scroll-hint">↓</div>
+  `;
+  return slide;
+}
+
+function slideLongest(s) {
+  const slide = el('section', 'slide tinted-2');
+  const t = s.longestTrack;
+  slide.innerHTML = `
+    <div class="slide-inner">
+      <div class="eyebrow">最長一趟</div>
+      <h2>單趟最遠</h2>
+      <div class="big-num">${fmtKm(t.distance)}<span class="unit">km</span></div>
+      <p class="sub">${fmtDateTime(t.startTime)} · 跑了 ${fmtDuration(t.duration)}</p>
+      <div class="mini-map" id="mini-long"></div>
+    </div>
+    <div class="scroll-hint">↓</div>
+  `;
+  return slide;
+}
+
+function slideEarlyLate(s) {
+  const slide = el('section', 'slide tinted-4');
+  const e = s.earliestRide, l = s.latestRide;
+  slide.innerHTML = `
+    <div class="slide-inner">
+      <div class="eyebrow">早起 vs 夜貓</div>
+      <h2>你的一天</h2>
+      <div class="kv-row">
+        <div class="kv">
+          <div class="v" style="color:var(--accent-3)">${fmtTimeOfDay(e.minutes)}</div>
+          <div class="k">最早出門</div>
+        </div>
+        <div class="kv">
+          <div class="v" style="color:var(--accent)">${fmtTimeOfDay(l.minutes)}</div>
+          <div class="k">最晚出門</div>
+        </div>
+      </div>
+      <p class="sub">最早：${fmtDate(e.time)} · 最晚：${fmtDate(l.time)}</p>
+    </div>
+    <div class="scroll-hint">↓</div>
+  `;
+  return slide;
+}
+
+function slideTerritory(s) {
+  const slide = el('section', 'slide tinted-5');
+  slide.innerHTML = `
+    <div class="slide-inner">
+      <div class="eyebrow">你的領土</div>
+      <h2>覆蓋範圍</h2>
+      <div class="big-num">${s.coverageKm2.toFixed(0)}<span class="unit">km²</span></div>
+      <div class="mini-map" id="mini-territory"></div>
+    </div>
+    <div class="scroll-hint">↓</div>
+  `;
+  return slide;
+}
+
+function slideOutro(s) {
+  const slide = el('section', 'slide tinted-1');
+  slide.innerHTML = `
+    <div class="slide-inner">
+      <div class="eyebrow">下一站</div>
+      <h2>看完整地圖</h2>
+      <p class="sub" style="margin-bottom: 32px">把全部 ${s.trackCount} 條軌跡疊在一張地圖上</p>
+      <div class="upload-actions" style="justify-content:center">
+        <a href="./map.html" class="btn">前往地圖</a>
+        <a href="./index.html" class="btn ghost">換一份資料</a>
+      </div>
+    </div>
+  `;
+  return slide;
+}
+
+// ============ Helpers ============
+
+function el(tag, cls) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  return e;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+
+function roundEarthFraction(meters) {
+  const km = meters / 1000;
+  if (km < 5) return `${(km * 1000).toFixed(0)} 公尺，是的⋯就這樣`;
+  if (km < 42.195) return `${(km / 42.195 * 100).toFixed(0)}% 的全馬距離`;
+  if (km < 100) return `${(km / 42.195).toFixed(1)} 個全馬`;
+  if (km < 394) return `${(km / 394 * 100).toFixed(0)}% 從台北到墾丁`;
+  if (km < 1100) return `${(km / 394).toFixed(1)} 趟台北–墾丁`;
+  if (km < 40075) return `${(km / 40075 * 100).toFixed(1)}% 的地球周長`;
+  return `${(km / 40075).toFixed(2)} 圈地球`;
+}
+
+function initMiniMap(id, track, color) {
+  const elNode = document.getElementById(id);
+  if (!elNode || !track || !track.polyline || track.polyline.length < 2) return;
+  const map = L.map(elNode, {
+    zoomControl: false, attributionControl: false,
+    dragging: false, scrollWheelZoom: false, doubleClickZoom: false,
+    boxZoom: false, keyboard: false, tap: false, touchZoom: false,
+  });
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
+    maxZoom: 18,
+  }).addTo(map);
+  const line = L.polyline(track.polyline, { color, weight: 4, opacity: 0.9 }).addTo(map);
+  // Start/end markers
+  const start = track.polyline[0];
+  const end = track.polyline[track.polyline.length - 1];
+  L.circleMarker(start, { radius: 5, color: '#fff', fillColor: color, fillOpacity: 1, weight: 2 }).addTo(map);
+  L.circleMarker(end, { radius: 5, color: '#fff', fillColor: '#fff', fillOpacity: 1, weight: 2 }).addTo(map);
+  map.fitBounds(line.getBounds(), { padding: [20, 20] });
+}
+
+function initTerritoryMap(id, tracks, bbox) {
+  const elNode = document.getElementById(id);
+  if (!elNode || !bbox) return;
+  const map = L.map(elNode, {
+    zoomControl: false, attributionControl: false,
+    dragging: false, scrollWheelZoom: false, doubleClickZoom: false,
+    boxZoom: false, keyboard: false, tap: false, touchZoom: false,
+  });
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
+    maxZoom: 18,
+  }).addTo(map);
+  // Sample tracks for performance — show up to 80
+  const sample = tracks.length <= 80
+    ? tracks
+    : tracks.filter((_, i) => i % Math.ceil(tracks.length / 80) === 0);
+  sample.forEach(t => {
+    if (t.polyline && t.polyline.length >= 2) {
+      L.polyline(t.polyline, { color: '#ff5a36', weight: 1.5, opacity: 0.5 }).addTo(map);
+    }
+  });
+  map.fitBounds([
+    [bbox.minLat, bbox.minLon],
+    [bbox.maxLat, bbox.maxLon],
+  ], { padding: [20, 20] });
+}

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>地圖 · Shield Review</title>
+<link rel="stylesheet" href="./css/style.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="logo">Shield<span>·</span>Review</div>
+    <div class="links">
+      <a href="./index.html">上傳</a>
+      <a href="./dashboard.html">回顧</a>
+      <a href="./map.html" class="active">地圖</a>
+    </div>
+  </div>
+</nav>
+
+<main id="root">
+  <div class="empty" id="empty">
+    <div class="ico">🗺️</div>
+    <h2>還沒有資料</h2>
+    <p>先到首頁上傳一份 .zip 軌跡，再來看地圖。</p>
+    <a href="./index.html" class="btn">前往上傳</a>
+  </div>
+
+  <div class="map-shell" id="shell" style="display:none">
+    <aside class="map-side">
+      <h3>總覽</h3>
+      <div class="summary" id="summary"></div>
+
+      <h3>顯示</h3>
+      <div class="toggles">
+        <button class="toggle on" data-mode="lines">路線</button>
+        <button class="toggle" data-mode="heat">熱力</button>
+      </div>
+
+      <h3 id="trackHeader">軌跡（0）</h3>
+      <div class="track-list" id="trackList"></div>
+    </aside>
+    <div id="leaflet-map"></div>
+  </div>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+<script type="module" src="./js/map.js"></script>
+</body>
+</html>

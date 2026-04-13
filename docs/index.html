@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Shield Review — 把你的軌跡記錄變成一份回顧</title>
+<meta name="description" content="上傳你的 GPX 軌跡壓縮檔，立刻得到 Spotify Wrapped 風格的回顧與互動地圖。">
+<link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="logo">Shield<span>·</span>Review</div>
+    <div class="links">
+      <a href="./index.html" class="active">上傳</a>
+      <a href="./dashboard.html">回顧</a>
+      <a href="./map.html">地圖</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <section class="hero">
+    <h1>把這段時間的軌跡<br><span class="grad">變成一份回顧</span></h1>
+    <p class="lead">上傳 RunningFree 匯出的 .zip，所有解析都在你的瀏覽器裡完成 — 沒有伺服器，紀錄不會離開你的裝置。</p>
+
+    <div class="upload-zone" id="dropzone">
+      <div class="icon">📦</div>
+      <h2>拖曳 .zip 到這裡</h2>
+      <p>或選擇檔案 / 載入示範資料</p>
+      <div class="upload-actions">
+        <label for="fileInput" class="btn">選擇檔案</label>
+        <input type="file" id="fileInput" accept=".zip,application/zip,application/x-zip-compressed">
+        <button class="btn ghost" id="demoBtn">載入示範資料</button>
+      </div>
+    </div>
+
+    <div class="progress" id="progress">
+      <div class="label"><span id="pLabel">準備中⋯</span><span class="right" id="pCount"></span></div>
+      <div class="bar"><div class="bar-fill" id="pFill"></div></div>
+    </div>
+  </section>
+
+  <section class="feature-grid">
+    <div class="feature">
+      <div class="ico">📍</div>
+      <h3>每一趟都被看見</h3>
+      <p>幾百條軌跡也能秒解析。每筆 trkpt 的 lat / lon / 速度 / 時間都被算進去。</p>
+    </div>
+    <div class="feature">
+      <div class="ico">🎧</div>
+      <h3>Wrapped 風格回顧</h3>
+      <p>大字、漸層、滑動切換 — 把你的數字變成可分享的故事。</p>
+    </div>
+    <div class="feature">
+      <div class="ico">🗺️</div>
+      <h3>互動地圖</h3>
+      <p>所有路線疊在一張地圖上，看見你的「領土」長什麼樣子。</p>
+    </div>
+    <div class="feature">
+      <div class="ico">🔒</div>
+      <h3>純前端、零上傳</h3>
+      <p>JSZip + DOMParser 都在瀏覽器跑，紀錄永遠在你這邊。</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Shield Review · 純靜態網站，由 GitHub Pages 提供 ·
+  <a href="https://github.com/Jung217/shield_review">原始碼</a>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script type="module" src="./js/app.js"></script>
+</body>
+</html>
