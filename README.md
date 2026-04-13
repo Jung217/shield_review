@@ -2,7 +2,7 @@
 
 > 緣起，看到手機會出的紀錄，想起原本想搞這個，僅此
 
-把 RunningFree 匯出的 GPX 軌跡壓縮檔變成一份 Spotify Wrapped 風格的回顧。
+把 RunningFree 匯出的 GPX 軌跡壓縮檔變成一份大字卡片式的回顧。
 **純前端、純靜態、零伺服器** — 紀錄完全留在你的瀏覽器。
 
 [Try it !](https://jung217.github.io/shield_review/)
@@ -11,7 +11,7 @@
 
 把 `share_track_*.zip` 丟進去之後：
 
-- **回顧頁**（Wrapped 風格）：總公里、總時數、出門天數、最長連續紀錄、熱門時段／星期、月度趨勢、最快速度、最長一趟、最早 / 最晚出門、覆蓋面積
+- **回顧頁**（大字卡片、滑動切換）：總公里、總時數、出門天數、最長連續紀錄、熱門時段／星期、月度趨勢、最快速度、最長一趟、最早 / 最晚出門、覆蓋面積，每張都能存成圖片
 - **地圖頁**：所有軌跡疊圖、線路 / 熱力切換、點軌跡看細節
 - **本機解析**：JSZip + DOMParser 都在瀏覽器跑，IndexedDB 緩存
 
@@ -30,7 +30,7 @@ python3 -m http.server 8765
 ```
 docs/
 ├── index.html        上傳頁
-├── dashboard.html    Wrapped 風回顧
+├── dashboard.html    大字卡片回顧
 ├── map.html          Leaflet 地圖
 ├── demo.zip          示範資料（369 條軌跡）
 ├── css/style.css
@@ -38,9 +38,9 @@ docs/
     ├── app.js          上傳 → 解析 → 緩存 → 跳轉
     ├── gpx-parser.js   GPX → track + 計算總計
     ├── zip-loader.js   JSZip 包裝
-    ├── stats.js        Wrapped 用的全部統計
+    ├── stats.js        回顧用的全部統計
     ├── storage.js      IndexedDB 緩存
-    ├── dashboard.js    渲染 Wrapped 卡片
+    ├── dashboard.js    渲染回顧卡片
     └── map.js          渲染地圖
 ```
 

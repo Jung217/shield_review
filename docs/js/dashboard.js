@@ -1,4 +1,4 @@
-// Render the Wrapped-style dashboard from the cached session.
+// Render the scroll-snap card reel dashboard from the cached session.
 
 import { loadSession } from './storage.js';
 import {
@@ -20,27 +20,194 @@ const empty = document.getElementById('empty');
 })();
 
 function render(s, tracks) {
-  const wrapped = el('div', 'wrapped');
+  const reel = el('div', 'reel');
 
-  wrapped.appendChild(slideHero(s));
-  wrapped.appendChild(slideDistance(s));
-  wrapped.appendChild(slideTime(s));
-  wrapped.appendChild(slideRides(s));
-  wrapped.appendChild(slideHours(s));
-  wrapped.appendChild(slideDow(s));
-  wrapped.appendChild(slideMonths(s));
-  wrapped.appendChild(slideFastest(s));
-  wrapped.appendChild(slideLongest(s));
-  wrapped.appendChild(slideEarlyLate(s));
-  wrapped.appendChild(slideTerritory(s));
-  wrapped.appendChild(slideOutro(s));
+  reel.appendChild(slideHero(s));
+  reel.appendChild(slideDistance(s));
+  reel.appendChild(slideTime(s));
+  reel.appendChild(slideRides(s));
+  reel.appendChild(slideHours(s));
+  reel.appendChild(slideDow(s));
+  reel.appendChild(slideMonths(s));
+  reel.appendChild(slideFastest(s));
+  reel.appendChild(slideLongest(s));
+  reel.appendChild(slideEarlyLate(s));
+  reel.appendChild(slideTerritory(s));
+  reel.appendChild(slideOutro(s));
 
-  root.appendChild(wrapped);
+  root.appendChild(reel);
 
   // Init mini-maps once they're in DOM
   initMiniMap('mini-fast', s.fastestTrack, '#ff5a36');
   initMiniMap('mini-long', s.longestTrack, '#ffb84d');
   initTerritoryMap('mini-territory', tracks, s.bbox);
+
+  addSaveFab();
+}
+
+// ============ SAVE AS IMAGE ============
+
+function addSaveFab() {
+  const fab = document.createElement('div');
+  fab.className = 'save-fab';
+  fab.innerHTML = `
+    <div class="toast"></div>
+    <div class="menu">
+      <button data-action="current">📸 存這張</button>
+      <button data-action="all">🗂 存完整回顧</button>
+    </div>
+    <button class="main-btn" title="存成圖片">💾</button>
+  `;
+  document.body.appendChild(fab);
+
+  const mainBtn = fab.querySelector('.main-btn');
+  const menu = fab.querySelector('.menu');
+  const toast = fab.querySelector('.toast');
+
+  mainBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    fab.classList.toggle('open');
+  });
+  document.addEventListener('click', (e) => {
+    if (!fab.contains(e.target)) fab.classList.remove('open');
+  });
+  menu.addEventListener('click', async (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    fab.classList.remove('open');
+    const action = btn.dataset.action;
+    setMenuBusy(menu, true);
+    showToast(toast, '產生圖片中⋯');
+    try {
+      if (action === 'current') await saveCurrentSlide();
+      else await saveAllSlides();
+      showToast(toast, '下載完成 ✓', 2000);
+    } catch (err) {
+      console.error(err);
+      showToast(toast, `失敗：${err.message}`, 3000);
+    } finally {
+      setMenuBusy(menu, false);
+    }
+  });
+}
+
+function setMenuBusy(menu, busy) {
+  menu.querySelectorAll('button').forEach(b => b.disabled = busy);
+}
+
+function showToast(toast, msg, autohide = 0) {
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toast._hideTimer);
+  if (autohide) {
+    toast._hideTimer = setTimeout(() => toast.classList.remove('show'), autohide);
+  }
+}
+
+function currentSlideIndex() {
+  const reel = document.querySelector('.reel');
+  const slides = document.querySelectorAll('.slide');
+  if (!reel || slides.length === 0) return 0;
+  const scrollTop = reel.scrollTop;
+  let best = 0, bestDist = Infinity;
+  slides.forEach((s, i) => {
+    const d = Math.abs(s.offsetTop - scrollTop);
+    if (d < bestDist) { bestDist = d; best = i; }
+  });
+  return best;
+}
+
+const H2C_OPTS = {
+  backgroundColor: '#0a0a0f',
+  scale: 2,
+  useCORS: true,
+  allowTaint: false,
+  logging: false,
+  // Only the cloned DOM is mutated, so the live page never flickers.
+  // html2canvas can't render `background-clip: text`, which would turn our
+  // gradient numbers into solid rectangles. We flatten those to a plain color
+  // *inline* (class-based CSS sometimes loses specificity fights inside the
+  // clone), and also hide chrome like the FAB and nav.
+  onclone(clonedDoc) {
+    clonedDoc.body.classList.add('capturing');
+    flattenForCapture(clonedDoc);
+  },
+};
+
+function flattenForCapture(doc) {
+  doc.querySelectorAll('.save-fab, .scroll-hint, .nav').forEach(n => {
+    n.style.setProperty('display', 'none', 'important');
+  });
+  const flatten = (n, color) => {
+    n.style.setProperty('background', 'none', 'important');
+    n.style.setProperty('background-image', 'none', 'important');
+    n.style.setProperty('-webkit-background-clip', 'border-box', 'important');
+    n.style.setProperty('background-clip', 'border-box', 'important');
+    n.style.setProperty('color', color, 'important');
+    n.style.setProperty('-webkit-text-fill-color', color, 'important');
+  };
+  // Big gradient numbers across slides
+  doc.querySelectorAll('.big-num').forEach(n => flatten(n, '#ff5a36'));
+  // .grad helper used on the upload hero
+  doc.querySelectorAll('.grad').forEach(n => flatten(n, '#ff5a36'));
+  // Inline `background-clip:text` spans (hero date range, etc.)
+  doc.querySelectorAll('[style*="background-clip"]').forEach(n => flatten(n, '#ff5a36'));
+  // The `km` / `小時` units inside .big-num should stay dim, not orange
+  doc.querySelectorAll('.big-num .unit').forEach(n => {
+    n.style.setProperty('color', '#9999a8', 'important');
+    n.style.setProperty('-webkit-text-fill-color', '#9999a8', 'important');
+  });
+}
+
+async function saveCurrentSlide() {
+  if (typeof html2canvas === 'undefined') throw new Error('html2canvas 沒載入');
+  const slides = document.querySelectorAll('.slide');
+  const idx = currentSlideIndex();
+  const slide = slides[idx];
+  if (!slide) throw new Error('找不到卡片');
+
+  const canvas = await html2canvas(slide, H2C_OPTS);
+  await downloadCanvas(canvas, `shield-review-${String(idx+1).padStart(2,'0')}.png`);
+}
+
+async function saveAllSlides() {
+  if (typeof html2canvas === 'undefined') throw new Error('html2canvas 沒載入');
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  if (slides.length === 0) throw new Error('沒有卡片');
+
+  const canvases = [];
+  for (const slide of slides) {
+    const c = await html2canvas(slide, H2C_OPTS);
+    canvases.push(c);
+  }
+  const W = canvases[0].width;
+  const H = canvases.reduce((s, c) => s + c.height, 0);
+  const out = document.createElement('canvas');
+  out.width = W; out.height = H;
+  const ctx = out.getContext('2d');
+  ctx.fillStyle = '#0a0a0f';
+  ctx.fillRect(0, 0, W, H);
+  let y = 0;
+  for (const c of canvases) {
+    ctx.drawImage(c, 0, y);
+    y += c.height;
+  }
+  await downloadCanvas(out, 'shield-review-full.png');
+}
+
+function downloadCanvas(canvas, filename) {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (!blob) return reject(new Error('轉 PNG 失敗'));
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => { URL.revokeObjectURL(url); resolve(); }, 800);
+    }, 'image/png');
+  });
 }
 
 // ============ SLIDES ============

@@ -124,8 +124,8 @@ input[type=file] { display: none; }
 
 footer { text-align: center; padding: 60px 20px 40px; color: var(--fg-dim); font-size: 13px; }
 
-/* ========= DASHBOARD (Wrapped style) ========= */
-.wrapped {
+/* ========= DASHBOARD (scroll-snap card reel) ========= */
+.reel {
   scroll-snap-type: y mandatory;
   overflow-y: scroll;
   height: 100vh;
@@ -208,6 +208,66 @@ footer { text-align: center; padding: 60px 20px 40px; color: var(--fg-dim); font
 @keyframes bounce {
   0%, 100% { transform: translate(-50%, 0); opacity: .6; }
   50% { transform: translate(-50%, 6px); opacity: 1; }
+}
+
+/* ========= SAVE-AS-IMAGE FAB ========= */
+.save-fab {
+  position: fixed; bottom: 24px; right: 24px; z-index: 200;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
+}
+.save-fab .main-btn {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: var(--accent); color: #fff; font-size: 22px;
+  box-shadow: 0 6px 18px rgba(255,90,54,.35);
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.save-fab .main-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(255,90,54,.45); }
+.save-fab .menu {
+  display: none; flex-direction: column; gap: 6px;
+  background: var(--bg-card); padding: 8px; border-radius: var(--radius-sm);
+  border: 1px solid rgba(255,255,255,.08); min-width: 180px;
+  box-shadow: 0 10px 24px rgba(0,0,0,.4);
+}
+.save-fab.open .menu { display: flex; }
+.save-fab .menu button {
+  padding: 10px 14px; border-radius: var(--radius-sm); text-align: left;
+  font-size: 14px; font-weight: 500;
+  transition: background .15s ease;
+}
+.save-fab .menu button:hover { background: rgba(255,255,255,.08); }
+.save-fab .menu button:disabled { opacity: .55; cursor: not-allowed; }
+.save-fab .toast {
+  position: absolute; bottom: 68px; right: 0;
+  background: rgba(0,0,0,.8); color: #fff; padding: 8px 14px;
+  border-radius: 999px; font-size: 13px; white-space: nowrap;
+  opacity: 0; transition: opacity .2s ease;
+  pointer-events: none;
+}
+.save-fab .toast.show { opacity: 1; }
+
+/* ---- In-capture overrides ----
+   html2canvas can't render `background-clip: text`, so gradient-filled text
+   would come out as a solid box. We swap to a plain accent color while
+   capturing. The `.capturing` class is only added to the *cloned* document
+   via html2canvas's onclone hook, so the live page never flickers. */
+.capturing .save-fab,
+.capturing .scroll-hint,
+.capturing .nav { display: none !important; }
+
+.capturing .big-num,
+.capturing .grad,
+.capturing [style*="background-clip"] {
+  background: none !important;
+  background-image: none !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+  color: var(--accent) !important;
+  -webkit-text-fill-color: var(--accent) !important;
+}
+.capturing .big-num .unit {
+  color: var(--fg-dim) !important;
+  -webkit-text-fill-color: var(--fg-dim) !important;
 }
 
 /* ========= MAP PAGE ========= */

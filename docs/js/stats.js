@@ -1,4 +1,4 @@
-// Aggregate per-track records into a Wrapped-style summary.
+// Aggregate per-track records into a summary for the review dashboard.
 // Pure functions, no DOM access — call once after parsing, store result.
 
 const DOW_LABELS = ['日', '一', '二', '三', '四', '五', '六'];
