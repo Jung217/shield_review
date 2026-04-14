@@ -586,23 +586,18 @@ body.reel-mode .nav {
   margin: 0; border-radius: 0; border: none; box-shadow: none;
   background: #14141c;
 }
-/* Single overlay block anchored to the bottom-left: brand → title → stats → footer,
-   stacked top-to-bottom, each line reading horizontally. */
+/* Single overlay block anchored to the bottom-right: brand → title → stats → footer,
+   stacked top-to-bottom, right-aligned, no background — text sits directly on the map. */
 .poster.portrait-fill .poster-overlay {
-  position: absolute; left: 0; bottom: 0;
+  position: absolute; right: 0; bottom: 0;
   width: 720px; max-width: 80%;
   padding: 56px 48px 56px;
-  background: linear-gradient(
-    135deg,
-    rgba(10,10,15,.88) 0%,
-    rgba(10,10,15,.72) 55%,
-    rgba(10,10,15,0) 100%
-  );
+  background: none;
   display: flex; flex-direction: column; gap: 22px;
-  text-align: left;
+  text-align: right;
 }
 .poster.portrait-fill .poster-overlay .brand-row {
-  justify-content: flex-start; gap: 20px;
+  justify-content: flex-end; gap: 20px;
 }
 .poster.portrait-fill h1 { font-size: 76px; line-height: 1; margin: 0; }
 .poster.portrait-fill .poster-stats {
@@ -613,12 +608,12 @@ body.reel-mode .nav {
 .poster.portrait-fill .poster-stats .stat {
   grid-column: auto;
   background: transparent;
-  border: none; border-left: 3px solid;
+  border: none; border-right: 3px solid;
   border-radius: 0;
-  padding: 6px 0 6px 16px;
+  padding: 6px 16px 6px 0;
   display: flex; align-items: baseline; gap: 18px;
 }
-.poster.portrait-fill .poster-stats .stat:nth-child(1) { padding: 6px 0 6px 16px; }
+.poster.portrait-fill .poster-stats .stat:nth-child(1) { padding: 6px 16px 6px 0; }
 .poster.portrait-fill .poster-stats .k {
   order: 1; width: 150px; flex-shrink: 0;
   font-size: 14px; margin-top: 0;
@@ -633,7 +628,7 @@ body.reel-mode .nav {
 .poster.portrait-fill .poster-footer {
   margin: 0; padding-top: 12px;
   border-top: 1px solid rgba(255,255,255,.1);
-  text-align: left;
+  text-align: right;
 }
 
 /* ========= EMPTY STATES ========= */

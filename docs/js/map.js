@@ -285,7 +285,13 @@ async function savePoster(variant = 'landscape') {
     if (!t.polyline || t.polyline.length < 2) return;
     L.polyline(t.polyline, { color: '#ff5a36', weight: 2, opacity: 0.65 }).addTo(pmap);
   });
-  pmap.fitBounds([[s.bbox.minLat, s.bbox.minLon], [s.bbox.maxLat, s.bbox.maxLon]], { padding: [30, 30] });
+  // Keep the crop tight against the track bbox. Landscape and portrait-split
+  // have framing / padding from the layout itself; portrait-fill is edge-to-edge
+  // so extra padding here just adds dead sea around the tracks.
+  const fitPadding = variant === 'portrait-fill' ? [6, 6]
+                   : variant === 'portrait-split' ? [16, 16]
+                   : [30, 30];
+  pmap.fitBounds([[s.bbox.minLat, s.bbox.minLon], [s.bbox.maxLat, s.bbox.maxLon]], { padding: fitPadding });
 
   try {
     await waitForTiles(tileLayer);
