@@ -13,7 +13,7 @@
 > 地圖總覽海報：
 
 <p align="center">
-  <img src="public/shield-review-overview.png" alt="地圖總覽" width="100%"/>
+  <img src="public/shield-review-overview.png" alt="地圖總覽" width="98.5%"/>
   <img src="public/shield-review-overview-fill.png" alt="地圖總覽" width="49%"/>
   <img src="public/shield-review-overview-portrait.png" alt="地圖總覽" width="49%"/>
 </p>
