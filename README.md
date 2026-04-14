@@ -9,36 +9,26 @@
 
 ## 預覽
 
-地圖總覽海報：
+> 地圖總覽海報：
 
 <p align="center">
   <img src="public/shield-review-overview.png" alt="地圖總覽" width="100%"/>
 </p>
 
-大字卡片回顧：
+> 卡片回顧：
 
-<table>
-  <tr>
-    <td width="50%"><img src="public/shield-review-01.png" alt="01"/></td>
-    <td width="50%"><img src="public/shield-review-02.png" alt="02"/></td>
-  </tr>
-  <tr>
-    <td><img src="public/shield-review-03.png" alt="03"/></td>
-    <td><img src="public/shield-review-04.png" alt="04"/></td>
-  </tr>
-  <tr>
-    <td><img src="public/shield-review-05.png" alt="05"/></td>
-    <td><img src="public/shield-review-06.png" alt="06"/></td>
-  </tr>
-  <tr>
-    <td><img src="public/shield-review-07.png" alt="07"/></td>
-    <td><img src="public/shield-review-08.png" alt="08"/></td>
-  </tr>
-  <tr>
-    <td><img src="public/shield-review-09.png" alt="09"/></td>
-    <td><img src="public/shield-review-10.png" alt="10"/></td>
-  </tr>
-</table>
+<p align="center">
+  <img src="public/shield-review-01.png" alt="01" width="48%"/>
+  <img src="public/shield-review-02.png" alt="02" width="48%"/>
+  <img src="public/shield-review-03.png" alt="03" width="48%"/>
+  <img src="public/shield-review-04.png" alt="04" width="48%"/>
+  <img src="public/shield-review-05.png" alt="05" width="48%"/>
+  <img src="public/shield-review-06.png" alt="06" width="48%"/>
+  <img src="public/shield-review-07.png" alt="07" width="48%"/>
+  <img src="public/shield-review-08.png" alt="08" width="48%"/>
+  <img src="public/shield-review-09.png" alt="09" width="48%"/>
+  <img src="public/shield-review-10.png" alt="10" width="48%"/>
+</p>
 
 ## 它能做什麼
 
@@ -48,7 +38,7 @@
 - **地圖頁**：所有軌跡疊圖、線路 / 熱力切換、點軌跡看細節、整份總覽存成海報
 - **本機解析**：JSZip + DOMParser 都在瀏覽器跑，IndexedDB 緩存
 
-## 在你電腦本機測
+## 在你的電腦測
 
 ```sh
 cd docs
@@ -87,4 +77,4 @@ docs/
 
 ## 隱私
 
-整份檔案從不離開瀏覽器。所有解析、計算、緩存（IndexedDB）都在你的裝置上做。
+整份檔案不離開本地瀏覽器，所有解析、計算、暫存（IndexedDB）都在你的裝置上。
