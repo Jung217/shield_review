@@ -380,7 +380,7 @@ function slideHero(s) {
   slide.innerHTML = `
     <div class="slide-inner">
       <div class="eyebrow">Shield · Review</div>
-      <h2>你的<br><span style="background:linear-gradient(135deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent">${escapeHtml(start)} → ${escapeHtml(end)}</span><br>軌跡回顧</h2>
+      <h2>你的<br><span style="background:linear-gradient(135deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent">${escapeHtml(start)}</span><br><span class="hero-arrow">↓</span><br><span style="background:linear-gradient(135deg,var(--accent-2),var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent">${escapeHtml(end)}</span><br>軌跡回顧</h2>
       <p class="sub">這份回顧涵蓋 ${s.dateRange.spanDays ?? '?'} 天，${s.trackCount} 條軌跡。</p>
     </div>
     <div class="scroll-hint">↓ 滑動看故事</div>
@@ -549,7 +549,7 @@ function slideLongest(s) {
 }
 
 function slideEarlyLate(s) {
-  const slide = el('section', 'slide tinted-4');
+  const slide = el('section', 'slide tinted-4 early-late');
   const e = s.earliestRide, l = s.latestRide;
   slide.innerHTML = `
     <div class="slide-inner">

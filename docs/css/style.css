@@ -510,6 +510,21 @@ body.reel-mode .nav {
 .capturing .slide[data-export-target="1"] .dow-bars .day .lbl { font-size: 22px; margin-top: 10px; }
 .capturing .slide[data-export-target="1"] .dow-bars .day .v { font-size: 22px; }
 
+/* Hero arrow between the two date lines — keep it dim + small so the dates stay the focus. */
+.capturing .slide[data-export-target="1"] h2 .hero-arrow {
+  display: inline-block;
+  font-size: .5em; line-height: 1;
+  color: #9999a8;
+  -webkit-text-fill-color: #9999a8;
+  margin: .1em 0;
+}
+
+/* slideEarlyLate has no .big-num — its kv pair IS the hero, so pump the size. */
+.capturing .slide[data-export-target="1"].early-late .kv-row { gap: 96px; margin-top: 56px; }
+.capturing .slide[data-export-target="1"].early-late .kv .v { font-size: 140px; line-height: 1; }
+.capturing .slide[data-export-target="1"].early-late .kv .k { font-size: 26px; margin-top: 14px; }
+.capturing .slide[data-export-target="1"].early-late .sub { font-size: 28px; margin-top: 44px; }
+
 /* Portrait A — title+stats on top, map hero below. 1080×1920. */
 .poster.portrait-split {
   width: 1080px; height: 1920px;
