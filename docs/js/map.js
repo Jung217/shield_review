@@ -224,9 +224,9 @@ async function savePoster(variant = 'landscape') {
   const statsBlock = `
     <div class="poster-stats">
       <div class="stat"><div class="v">${fmtKm(s.totalDistance)}<span class="unit">km</span></div><div class="k">總里程</div></div>
-      <div class="stat"><div class="v">${s.trackCount}</div><div class="k">趟數</div></div>
+      <div class="stat"><div class="v">${s.trackCount}<span class="unit">趟</span></div><div class="k">趟數</div></div>
       <div class="stat"><div class="v">${hours}<span class="unit">hr</span></div><div class="k">移動時間</div></div>
-      <div class="stat"><div class="v">${s.daysActive}</div><div class="k">出門天數</div></div>
+      <div class="stat"><div class="v">${s.daysActive}<span class="unit">天</span></div><div class="k">出門天數</div></div>
       <div class="stat"><div class="v">${maxSpeed}<span class="unit">km/h</span></div><div class="k">最高速度</div></div>
     </div>`;
   const footer = `<div class="poster-footer">shield · review · ${s.trackCount} 條軌跡・${s.dateRange.spanDays ?? '?'} 天</div>`;
