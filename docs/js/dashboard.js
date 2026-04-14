@@ -9,6 +9,8 @@ import {
 const root = document.getElementById('root');
 const empty = document.getElementById('empty');
 
+let summaryRef = null;
+
 (async function init() {
   const session = await loadSession();
   if (!session || !session.tracks || session.tracks.length === 0) return;
@@ -20,6 +22,7 @@ const empty = document.getElementById('empty');
 })();
 
 function render(s, tracks) {
+  summaryRef = s;
   const reel = el('div', 'reel');
 
   reel.appendChild(slideHero(s));
@@ -154,12 +157,133 @@ function h2cOpts(scale) {
 }
 
 async function captureSlide(slide, scale) {
+  if (slide.querySelector('.mini-map')) {
+    return captureSlideWithMap(slide, scale);
+  }
   slide.setAttribute('data-export-target', '1');
   try {
     return await html2canvas(slide, h2cOpts(scale));
   } finally {
     slide.removeAttribute('data-export-target');
   }
+}
+
+// Slides with a Leaflet mini-map can't be captured directly: the live map is
+// sized to the viewer's viewport, and html2canvas also mis-handles Leaflet's
+// translate3d tile positioning. We clone the slide off-screen at the export
+// size, rebuild a fresh Leaflet map inside it, stamp the tiles+polyline onto
+// the html2canvas output (mirroring the poster export in map.js).
+async function captureSlideWithMap(slide, scale) {
+  if (typeof L === 'undefined') throw new Error('Leaflet 沒載入');
+
+  const wrapper = document.createElement('div');
+  wrapper.style.cssText = `position:fixed;left:-99999px;top:0;width:${EXPORT_W}px;height:${EXPORT_H}px;overflow:hidden;`;
+  const clone = slide.cloneNode(true);
+  clone.setAttribute('data-export-target', '1');
+  clone.style.setProperty('width', EXPORT_W + 'px', 'important');
+  clone.style.setProperty('height', EXPORT_H + 'px', 'important');
+  clone.style.setProperty('min-height', EXPORT_H + 'px', 'important');
+  clone.style.setProperty('box-sizing', 'border-box', 'important');
+  wrapper.appendChild(clone);
+  document.body.appendChild(wrapper);
+
+  // Wipe stale Leaflet DOM from the cloned mini-map so L.map can take over.
+  const miniEl = clone.querySelector('.mini-map');
+  miniEl.innerHTML = '';
+  miniEl.className = 'mini-map';
+
+  const track = miniEl.id === 'mini-fast' ? summaryRef?.fastestTrack
+              : miniEl.id === 'mini-long' ? summaryRef?.longestTrack : null;
+  const color = miniEl.id === 'mini-fast' ? '#ff5a36' : '#ffb84d';
+
+  let pmap = null;
+  try {
+    if (!track || !track.polyline || track.polyline.length < 2) {
+      return await html2canvas(clone, h2cOpts(scale));
+    }
+    pmap = L.map(miniEl, {
+      zoomControl: false, attributionControl: false,
+      dragging: false, scrollWheelZoom: false, doubleClickZoom: false,
+      boxZoom: false, keyboard: false, tap: false, touchZoom: false,
+      preferCanvas: true, zoomSnap: 0.25,
+    });
+    const tileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
+      maxZoom: 18, crossOrigin: 'anonymous',
+    }).addTo(pmap);
+    const line = L.polyline(track.polyline, { color, weight: 4, opacity: 0.9 }).addTo(pmap);
+    const start = track.polyline[0];
+    const end = track.polyline[track.polyline.length - 1];
+    L.circleMarker(start, { radius: 5, color: '#fff', fillColor: color, fillOpacity: 1, weight: 2 }).addTo(pmap);
+    L.circleMarker(end,   { radius: 5, color: '#fff', fillColor: '#fff', fillOpacity: 1, weight: 2 }).addTo(pmap);
+    pmap.fitBounds(line.getBounds(), { padding: [20, 20] });
+
+    await waitForTiles(tileLayer);
+    await new Promise(r => requestAnimationFrame(() => setTimeout(r, 300)));
+
+    const mapCanvas = renderLeafletToCanvas(miniEl, scale);
+    const canvas = await html2canvas(clone, h2cOpts(scale));
+    const miniRect  = miniEl.getBoundingClientRect();
+    const cloneRect = clone.getBoundingClientRect();
+    const mx = Math.round((miniRect.left - cloneRect.left) * scale);
+    const my = Math.round((miniRect.top  - cloneRect.top)  * scale);
+    canvas.getContext('2d').drawImage(mapCanvas, mx, my);
+    return canvas;
+  } finally {
+    if (pmap) pmap.remove();
+    wrapper.remove();
+  }
+}
+
+function waitForTiles(tileLayer) {
+  return new Promise(resolve => {
+    let done = false;
+    const finish = () => { if (!done) { done = true; resolve(); } };
+    tileLayer.once('load', finish);
+    setTimeout(finish, 6000);
+  });
+}
+
+function renderLeafletToCanvas(mapEl, scale) {
+  const rect = mapEl.getBoundingClientRect();
+  const out = document.createElement('canvas');
+  out.width = Math.round(rect.width * scale);
+  out.height = Math.round(rect.height * scale);
+  const ctx = out.getContext('2d');
+  ctx.scale(scale, scale);
+  ctx.fillStyle = '#1a1a24';
+  ctx.fillRect(0, 0, rect.width, rect.height);
+
+  const radius = 16;
+  ctx.save();
+  roundedRectPath(ctx, 0, 0, rect.width, rect.height, radius);
+  ctx.clip();
+
+  for (const img of mapEl.querySelectorAll('img.leaflet-tile')) {
+    if (!img.complete || img.naturalWidth === 0) continue;
+    const ir = img.getBoundingClientRect();
+    ctx.globalAlpha = parseFloat(getComputedStyle(img).opacity) || 1;
+    try { ctx.drawImage(img, ir.left - rect.left, ir.top - rect.top, ir.width, ir.height); }
+    catch { /* cross-origin tile — skip */ }
+  }
+  ctx.globalAlpha = 1;
+
+  for (const c of mapEl.querySelectorAll('canvas')) {
+    const cr = c.getBoundingClientRect();
+    try { ctx.drawImage(c, cr.left - rect.left, cr.top - rect.top, cr.width, cr.height); }
+    catch { /* tainted — skip */ }
+  }
+  ctx.restore();
+  return out;
+}
+
+function roundedRectPath(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
 }
 
 function flattenForCapture(doc) {
