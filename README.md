@@ -14,29 +14,31 @@
 
 <p align="center">
   <img src="public/shield-review-overview.png" alt="地圖總覽" width="100%"/>
+  <img src="public/shield-review-overview-fill.png" alt="地圖總覽" width="49%"/>
+  <img src="public/shield-review-overview-portrait.png" alt="地圖總覽" width="49%"/>
 </p>
 
 > 卡片回顧：
 
 <p align="center">
-  <img src="public/shield-review-01.png" alt="01" width="48%"/>
-  <img src="public/shield-review-02.png" alt="02" width="48%"/>
-  <img src="public/shield-review-03.png" alt="03" width="48%"/>
-  <img src="public/shield-review-04.png" alt="04" width="48%"/>
-  <img src="public/shield-review-05.png" alt="05" width="48%"/>
-  <img src="public/shield-review-06.png" alt="06" width="48%"/>
-  <img src="public/shield-review-07.png" alt="07" width="48%"/>
-  <img src="public/shield-review-08.png" alt="08" width="48%"/>
-  <img src="public/shield-review-09.png" alt="09" width="48%"/>
-  <img src="public/shield-review-10.png" alt="10" width="48%"/>
+  <img src="public/shield-review-01.png" alt="01" width="49%"/>
+  <img src="public/shield-review-02.png" alt="02" width="49%"/>
+  <img src="public/shield-review-03.png" alt="03" width="49%"/>
+  <img src="public/shield-review-04.png" alt="04" width="49%"/>
+  <img src="public/shield-review-05.png" alt="05" width="49%"/>
+  <img src="public/shield-review-06.png" alt="06" width="49%"/>
+  <img src="public/shield-review-07.png" alt="07" width="49%"/>
+  <img src="public/shield-review-08.png" alt="08" width="49%"/>
+  <img src="public/shield-review-09.png" alt="09" width="49%"/>
+  <img src="public/shield-review-10.png" alt="10" width="49%"/>
 </p>
 
 ## 它能做什麼
 
 把 `share_track_*.zip` 丟進去之後：
 
-- **回顧頁**（大字卡片、滑動切換）：總公里、總時數、趟數、熱門時段／星期、月度趨勢、最快速度、最長一趟、最早 / 最晚出門，每張都能存成圖片
-- **地圖頁**：所有軌跡疊圖、線路 / 熱力切換、點軌跡看細節、整份總覽存成海報
+- **回顧頁**（大字卡片、滑動切換）：總公里、總時數、趟數、熱門時段／星期、月度趨勢、最快速度、最長一趟、最早 / 最晚出門。每張可單獨存，也能一鍵打包，固定 1080×1920 直式輸出
+- **地圖頁**：所有軌跡疊圖、線路 / 熱力切換、點軌跡看細節。總覽海報三種版型 — 橫式 16:9、直式上文下圖、直式地圖鋪滿
 - **本機解析**：JSZip + DOMParser 都在瀏覽器跑，IndexedDB 緩存
 
 ## 在你的電腦測
