@@ -298,20 +298,7 @@ async function savePoster(variant = 'landscape') {
     // <canvas>). We render the map ourselves via getBoundingClientRect (which
     // sees post-transform positions) and stamp it onto the html2canvas output.
     const mapCanvas = renderLeafletToCanvas(mapEl, scale);
-    // For portrait-fill the overlays have to sit *on top of* the map, so we
-    // render the poster with a transparent background and composite map-first.
     const isFill = variant === 'portrait-fill';
-    const posterCanvas = await html2canvas(poster, {
-      backgroundColor: isFill ? null : '#0a0a0f',
-      scale, useCORS: true, allowTaint: false, logging: false,
-      onclone(doc) {
-        if (!isFill) return;
-        const p = doc.querySelector('.poster.portrait-fill');
-        if (p) p.style.setProperty('background', 'none', 'important');
-        const mapDiv = doc.querySelector('.poster.portrait-fill .poster-map');
-        if (mapDiv) mapDiv.style.setProperty('background', 'none', 'important');
-      },
-    });
     const mapRect = mapEl.getBoundingClientRect();
     const posterRect = poster.getBoundingClientRect();
     const mapX = Math.round((mapRect.left - posterRect.left) * scale);
@@ -319,15 +306,32 @@ async function savePoster(variant = 'landscape') {
 
     let finalCanvas;
     if (isFill) {
+      // html2canvas on the whole .poster (position: fixed, off-screen) refused
+      // to render the absolutely-positioned overlay — the fill export came out
+      // with a full map but zero text. Capturing just the overlay element is
+      // simpler and sidesteps any stacking / transparency issues.
+      const overlay = poster.querySelector('.poster-overlay');
+      const overlayCanvas = await html2canvas(overlay, {
+        backgroundColor: null,
+        scale, useCORS: true, allowTaint: false, logging: false,
+      });
+      const overlayRect = overlay.getBoundingClientRect();
+      const ox = Math.round((overlayRect.left - posterRect.left) * scale);
+      const oy = Math.round((overlayRect.top  - posterRect.top)  * scale);
+
       finalCanvas = document.createElement('canvas');
-      finalCanvas.width = posterCanvas.width;
-      finalCanvas.height = posterCanvas.height;
+      finalCanvas.width  = Math.round(posterRect.width  * scale);
+      finalCanvas.height = Math.round(posterRect.height * scale);
       const fctx = finalCanvas.getContext('2d');
       fctx.fillStyle = '#0a0a0f';
       fctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
       fctx.drawImage(mapCanvas, mapX, mapY);
-      fctx.drawImage(posterCanvas, 0, 0);
+      fctx.drawImage(overlayCanvas, ox, oy);
     } else {
+      const posterCanvas = await html2canvas(poster, {
+        backgroundColor: '#0a0a0f',
+        scale, useCORS: true, allowTaint: false, logging: false,
+      });
       posterCanvas.getContext('2d').drawImage(mapCanvas, mapX, mapY);
       finalCanvas = posterCanvas;
     }
