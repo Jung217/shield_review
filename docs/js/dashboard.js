@@ -184,6 +184,9 @@ async function captureSlideWithMap(slide, scale) {
   clone.style.setProperty('height', EXPORT_H + 'px', 'important');
   clone.style.setProperty('min-height', EXPORT_H + 'px', 'important');
   clone.style.setProperty('box-sizing', 'border-box', 'important');
+  // slide-inner normally caps at 720px — give the map room to breathe.
+  const inner = clone.querySelector('.slide-inner');
+  if (inner) inner.style.setProperty('max-width', '920px', 'important');
   wrapper.appendChild(clone);
   document.body.appendChild(wrapper);
 
@@ -191,6 +194,12 @@ async function captureSlideWithMap(slide, scale) {
   const miniEl = clone.querySelector('.mini-map');
   miniEl.innerHTML = '';
   miniEl.className = 'mini-map';
+  // The default .mini-map is only 280px tall — too small at 1920 export height.
+  // Bump it so the map reads as the main subject of the card.
+  miniEl.style.setProperty('width', '100%', 'important');
+  miniEl.style.setProperty('max-width', '880px', 'important');
+  miniEl.style.setProperty('height', '1000px', 'important');
+  miniEl.style.setProperty('margin', '32px auto', 'important');
 
   const track = miniEl.id === 'mini-fast' ? summaryRef?.fastestTrack
               : miniEl.id === 'mini-long' ? summaryRef?.longestTrack : null;
