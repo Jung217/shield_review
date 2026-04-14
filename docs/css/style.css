@@ -470,6 +470,46 @@ body.reel-mode .nav {
   border-top: 1px solid rgba(255,255,255,.06);
 }
 
+/* ========= EXPORT OVERRIDES =========
+   Viewer slides use viewport-proportional `clamp()` sizes that look fine on a
+   phone but feel timid when rendered into the fixed 1080×1920 export canvas.
+   These rules only apply inside html2canvas's clone (body gets `.capturing`)
+   *and* only to the slide being exported (`data-export-target="1"`), so the
+   live reel isn't affected. */
+.capturing .slide[data-export-target="1"] .slide-inner { max-width: 960px; }
+.capturing .slide[data-export-target="1"] .eyebrow {
+  font-size: 22px; letter-spacing: .22em; margin-bottom: 28px;
+}
+.capturing .slide[data-export-target="1"] h2 {
+  font-size: 80px; line-height: 1.05; margin-bottom: 36px;
+}
+.capturing .slide[data-export-target="1"] .big-num {
+  font-size: 240px; margin: 24px 0;
+}
+.capturing .slide[data-export-target="1"] .unit { font-size: .32em; }
+.capturing .slide[data-export-target="1"] .sub { font-size: 28px; margin-top: 28px; }
+.capturing .slide[data-export-target="1"] .kv-row { gap: 64px; margin-top: 44px; }
+.capturing .slide[data-export-target="1"] .kv .v { font-size: 72px; }
+.capturing .slide[data-export-target="1"] .kv .k { font-size: 18px; margin-top: 8px; }
+.capturing .slide[data-export-target="1"] .heatmap,
+.capturing .slide[data-export-target="1"] .hour-labels {
+  max-width: 960px; gap: 6px;
+}
+.capturing .slide[data-export-target="1"] .hour-labels span { font-size: 18px; }
+.capturing .slide[data-export-target="1"] .bars {
+  max-width: 960px; height: 380px; gap: 6px;
+}
+.capturing .slide[data-export-target="1"] .bars .bar .lbl {
+  font-size: 18px; bottom: -32px;
+}
+.capturing .slide[data-export-target="1"] .bars-wrap { padding-bottom: 44px; }
+.capturing .slide[data-export-target="1"] .dow-bars {
+  max-width: 960px; gap: 14px;
+}
+.capturing .slide[data-export-target="1"] .dow-bars .day .bar { height: 280px; }
+.capturing .slide[data-export-target="1"] .dow-bars .day .lbl { font-size: 22px; margin-top: 10px; }
+.capturing .slide[data-export-target="1"] .dow-bars .day .v { font-size: 22px; }
+
 /* Portrait A — title+stats on top, map hero below. 1080×1920. */
 .poster.portrait-split {
   width: 1080px; height: 1920px;
