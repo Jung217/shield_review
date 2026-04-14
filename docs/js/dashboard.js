@@ -32,7 +32,6 @@ function render(s, tracks) {
   reel.appendChild(slideFastest(s));
   reel.appendChild(slideLongest(s));
   reel.appendChild(slideEarlyLate(s));
-  reel.appendChild(slideTerritory(s));
   reel.appendChild(slideOutro(s));
 
   root.appendChild(reel);
@@ -44,7 +43,6 @@ function render(s, tracks) {
   // Init mini-maps once they're in DOM
   initMiniMap('mini-fast', s.fastestTrack, '#ff5a36');
   initMiniMap('mini-long', s.longestTrack, '#ffb84d');
-  initTerritoryMap('mini-territory', tracks, s.bbox);
 
   addSaveFab();
 }
@@ -423,20 +421,6 @@ function slideEarlyLate(s) {
   return slide;
 }
 
-function slideTerritory(s) {
-  const slide = el('section', 'slide tinted-5');
-  slide.innerHTML = `
-    <div class="slide-inner">
-      <div class="eyebrow">你的領土</div>
-      <h2>覆蓋範圍</h2>
-      <div class="big-num">${s.coverageKm2.toFixed(0)}<span class="unit">km²</span></div>
-      <div class="mini-map" id="mini-territory"></div>
-    </div>
-    <div class="scroll-hint">↓</div>
-  `;
-  return slide;
-}
-
 function slideOutro(s) {
   const slide = el('section', 'slide tinted-1 no-save');
   slide.innerHTML = `
@@ -498,28 +482,3 @@ function initMiniMap(id, track, color) {
   map.fitBounds(line.getBounds(), { padding: [20, 20] });
 }
 
-function initTerritoryMap(id, tracks, bbox) {
-  const elNode = document.getElementById(id);
-  if (!elNode || !bbox) return;
-  const map = L.map(elNode, {
-    zoomControl: false, attributionControl: false,
-    dragging: false, scrollWheelZoom: false, doubleClickZoom: false,
-    boxZoom: false, keyboard: false, tap: false, touchZoom: false,
-  });
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
-    maxZoom: 18,
-  }).addTo(map);
-  // Sample tracks for performance — show up to 80
-  const sample = tracks.length <= 80
-    ? tracks
-    : tracks.filter((_, i) => i % Math.ceil(tracks.length / 80) === 0);
-  sample.forEach(t => {
-    if (t.polyline && t.polyline.length >= 2) {
-      L.polyline(t.polyline, { color: '#ff5a36', weight: 1.5, opacity: 0.5 }).addTo(map);
-    }
-  });
-  map.fitBounds([
-    [bbox.minLat, bbox.minLon],
-    [bbox.maxLat, bbox.maxLon],
-  ], { padding: [20, 20] });
-}
