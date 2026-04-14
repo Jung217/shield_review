@@ -61,7 +61,7 @@ function addSaveFab() {
     <div class="toast"></div>
     <div class="menu">
       <button data-action="current">📸 存這張</button>
-      <button data-action="all">🗂 存完整回顧</button>
+      <button data-action="all">🗂 存完整回顧 (zip)</button>
     </div>
     <button class="main-btn" title="存成圖片">💾</button>
   `;
@@ -185,51 +185,41 @@ async function saveCurrentSlide() {
 
 async function saveAllSlides() {
   if (typeof html2canvas === 'undefined') throw new Error('html2canvas 沒載入');
+  if (typeof JSZip === 'undefined') throw new Error('JSZip 沒載入');
   const slides = Array.from(document.querySelectorAll('.slide'));
   if (slides.length === 0) throw new Error('沒有卡片');
 
-  // iOS Safari caps canvas area ~16 Mpx. A 400-wide phone × 12 slides × ~900
-  // tall × scale 2 = ~17 Mpx and fails silently. Pick scale so the final
-  // stitched canvas stays under ~14 Mpx.
-  const slideW = slides[0].offsetWidth;
-  const slideH = slides.reduce((s, el) => s + el.offsetHeight, 0);
-  const MAX_AREA = 14_000_000;
-  const naturalArea = slideW * slideH;
-  const scale = Math.min(IS_MOBILE ? 1.5 : 2, Math.sqrt(MAX_AREA / naturalArea));
-
-  const canvases = [];
-  for (const slide of slides) {
-    const c = await html2canvas(slide, h2cOpts(scale));
-    canvases.push(c);
+  const scale = IS_MOBILE ? 1.5 : 2;
+  const zip = new JSZip();
+  for (let i = 0; i < slides.length; i++) {
+    const c = await html2canvas(slides[i], h2cOpts(scale));
+    const blob = await new Promise((resolve, reject) =>
+      c.toBlob(b => b ? resolve(b) : reject(new Error('轉 PNG 失敗')), 'image/png')
+    );
+    zip.file(`shield-review-${String(i + 1).padStart(2, '0')}.png`, blob);
   }
-  const W = canvases[0].width;
-  const H = canvases.reduce((s, c) => s + c.height, 0);
-  const out = document.createElement('canvas');
-  out.width = W; out.height = H;
-  const ctx = out.getContext('2d');
-  ctx.fillStyle = '#0a0a0f';
-  ctx.fillRect(0, 0, W, H);
-  let y = 0;
-  for (const c of canvases) {
-    ctx.drawImage(c, 0, y);
-    y += c.height;
-  }
-  await downloadCanvas(out, 'shield-review-full.png');
+  const zipBlob = await zip.generateAsync({ type: 'blob' });
+  downloadBlob(zipBlob, 'shield-review.zip');
 }
 
 function downloadCanvas(canvas, filename) {
   return new Promise((resolve, reject) => {
-    canvas.toBlob((blob) => {
+    canvas.toBlob(blob => {
       if (!blob) return reject(new Error('轉 PNG 失敗'));
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => { URL.revokeObjectURL(url); resolve(); }, 800);
+      downloadBlob(blob, filename);
+      resolve();
     }, 'image/png');
   });
+}
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 800);
 }
 
 // ============ SLIDES ============
