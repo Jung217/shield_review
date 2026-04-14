@@ -254,10 +254,9 @@ async function savePoster(variant = 'landscape') {
   } else if (variant === 'portrait-fill') {
     poster.innerHTML = `
       <div class="poster-map"></div>
-      <div class="poster-overlay-top">
-        <div class="poster-head">${brandRow}${title}</div>
-      </div>
-      <div class="poster-overlay-bottom">
+      <div class="poster-overlay">
+        ${brandRow}
+        ${title}
         ${statsBlock}
         ${footer}
       </div>

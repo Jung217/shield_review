@@ -560,42 +560,54 @@ body.reel-mode .nav {
   margin: 0; border-radius: 0; border: none; box-shadow: none;
   background: #14141c;
 }
-.poster.portrait-fill .poster-overlay-top {
-  position: absolute; top: 0; left: 0; right: 0;
-  padding: 56px 48px 140px;
-  background: linear-gradient(180deg, rgba(10,10,15,.92) 0%, rgba(10,10,15,.55) 55%, rgba(10,10,15,0) 100%);
-  display: flex; flex-direction: column; gap: 16px;
-  pointer-events: none;
+/* Single overlay block anchored to the bottom-left: brand → title → stats → footer,
+   stacked top-to-bottom, each line reading horizontally. */
+.poster.portrait-fill .poster-overlay {
+  position: absolute; left: 0; bottom: 0;
+  width: 720px; max-width: 80%;
+  padding: 56px 48px 56px;
+  background: linear-gradient(
+    135deg,
+    rgba(10,10,15,.88) 0%,
+    rgba(10,10,15,.72) 55%,
+    rgba(10,10,15,0) 100%
+  );
+  display: flex; flex-direction: column; gap: 22px;
+  text-align: left;
 }
-.poster.portrait-fill .poster-overlay-top::before {
-  content: ''; position: absolute; top: 0; left: 48px; right: 48px;
-  height: 4px; border-radius: 0 0 4px 4px;
-  background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent-3), var(--good));
+.poster.portrait-fill .poster-overlay .brand-row {
+  justify-content: flex-start; gap: 20px;
 }
-.poster.portrait-fill h1 { font-size: 88px; }
-.poster.portrait-fill .poster-overlay-bottom {
-  position: absolute; bottom: 0; left: 0; right: 0;
-  padding: 140px 40px 48px;
-  background: linear-gradient(0deg, rgba(10,10,15,.95) 0%, rgba(10,10,15,.7) 55%, rgba(10,10,15,0) 100%);
-  display: flex; flex-direction: column; gap: 18px;
-}
+.poster.portrait-fill h1 { font-size: 76px; line-height: 1; margin: 0; }
 .poster.portrait-fill .poster-stats {
-  grid-template-columns: repeat(5, 1fr);
+  display: flex; flex-direction: column;
+  grid-template-columns: none;
   gap: 10px;
 }
 .poster.portrait-fill .poster-stats .stat {
-  background: rgba(15,15,22,.72);
-  padding: 18px 14px;
+  grid-column: auto;
+  background: transparent;
+  border: none; border-left: 3px solid;
+  border-radius: 0;
+  padding: 6px 0 6px 16px;
+  display: flex; align-items: baseline; gap: 18px;
 }
-.poster.portrait-fill .poster-stats .stat:nth-child(1) { grid-column: auto; padding: 18px 14px; }
-.poster.portrait-fill .poster-stats .v { font-size: 28px; }
-.poster.portrait-fill .poster-stats .stat:nth-child(1) .v { font-size: 32px; }
-.poster.portrait-fill .poster-stats .v .unit { font-size: 13px; }
-.poster.portrait-fill .poster-stats .stat:nth-child(1) .v .unit { font-size: 15px; }
-.poster.portrait-fill .poster-stats .k { font-size: 10px; margin-top: 6px; }
+.poster.portrait-fill .poster-stats .stat:nth-child(1) { padding: 6px 0 6px 16px; }
+.poster.portrait-fill .poster-stats .k {
+  order: 1; width: 150px; flex-shrink: 0;
+  font-size: 14px; margin-top: 0;
+}
+.poster.portrait-fill .poster-stats .v {
+  order: 2; flex: 1; text-align: right;
+  font-size: 40px;
+}
+.poster.portrait-fill .poster-stats .stat:nth-child(1) .v { font-size: 40px; }
+.poster.portrait-fill .poster-stats .v .unit { font-size: 16px; }
+.poster.portrait-fill .poster-stats .stat:nth-child(1) .v .unit { font-size: 16px; }
 .poster.portrait-fill .poster-footer {
-  margin: 0; padding: 0; border: none;
-  text-align: center;
+  margin: 0; padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,.1);
+  text-align: left;
 }
 
 /* ========= EMPTY STATES ========= */
