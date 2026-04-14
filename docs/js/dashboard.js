@@ -442,7 +442,7 @@ function slideRides(s) {
 }
 
 function slideHours(s) {
-  const slide = el('section', 'slide tinted-5');
+  const slide = el('section', 'slide tinted-5 hours-slide');
   const max = Math.max(...s.byHour);
   const cells = s.byHour.map((c, h) => {
     const ratio = max ? c / max : 0;

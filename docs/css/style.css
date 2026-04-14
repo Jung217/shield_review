@@ -481,7 +481,7 @@ body.reel-mode .nav {
   font-size: 22px; letter-spacing: .22em; margin-bottom: 28px;
 }
 .capturing .slide[data-export-target="1"] h2 {
-  font-size: 80px; line-height: 1.05; margin-bottom: 36px;
+  font-size: 80px; line-height: 1.35; margin-bottom: 36px;
 }
 .capturing .slide[data-export-target="1"] .big-num {
   font-size: 240px; margin: 24px 0;
@@ -510,13 +510,24 @@ body.reel-mode .nav {
 .capturing .slide[data-export-target="1"] .dow-bars .day .lbl { font-size: 22px; margin-top: 10px; }
 .capturing .slide[data-export-target="1"] .dow-bars .day .v { font-size: 22px; }
 
-/* Hero arrow between the two date lines — keep it dim + small so the dates stay the focus. */
+/* Hero arrow between the two date lines — match the live page look: same
+   display font weight as the h2 itself, just slightly dimmed so the dates win. */
 .capturing .slide[data-export-target="1"] h2 .hero-arrow {
   display: inline-block;
-  font-size: .5em; line-height: 1;
-  color: #9999a8;
-  -webkit-text-fill-color: #9999a8;
-  margin: .1em 0;
+  font-size: 1em;
+  line-height: 1;
+  color: var(--fg);
+  -webkit-text-fill-color: var(--fg);
+}
+
+/* slideHours — heatmap is small-ish, so the caption does the heavy lifting; bump it. */
+.capturing .slide[data-export-target="1"].hours-slide h2 {
+  font-size: 104px; line-height: 1.15;
+}
+.capturing .slide[data-export-target="1"].hours-slide .sub { font-size: 34px; margin-top: 36px; }
+.capturing .slide[data-export-target="1"].hours-slide .hour-labels span { font-size: 22px; }
+.capturing .slide[data-export-target="1"].hours-slide .heatmap .cell {
+  aspect-ratio: auto; height: 52px;
 }
 
 /* slideEarlyLate has no .big-num — its kv pair IS the hero, so pump the size. */
