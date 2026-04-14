@@ -200,22 +200,24 @@ async function savePoster() {
   const poster = document.createElement('div');
   poster.className = 'poster';
   poster.innerHTML = `
-    <div class="poster-head">
-      <div class="brand-row">
-        <div class="brand">Shield<span>·</span>Review</div>
-        <div class="date-range">${escapeHtml(dateStart)} → ${escapeHtml(dateEnd)}</div>
+    <div class="poster-left">
+      <div class="poster-head">
+        <div class="brand-row">
+          <div class="brand">Shield<span>·</span>Review</div>
+          <div class="date-range">${escapeHtml(dateStart)} → ${escapeHtml(dateEnd)}</div>
+        </div>
+        <h1>你的<span class="dim">軌跡</span>總覽</h1>
       </div>
-      <h1>你的<span class="dim">軌跡</span>總覽</h1>
-    </div>
-    <div class="poster-stats">
-      <div class="stat"><div class="v">${s.trackCount}</div><div class="k">趟數</div></div>
-      <div class="stat"><div class="v">${fmtKm(s.totalDistance)}<span class="unit">km</span></div><div class="k">總里程</div></div>
-      <div class="stat"><div class="v">${hours}<span class="unit">hr</span></div><div class="k">移動時間</div></div>
-      <div class="stat"><div class="v">${s.daysActive}</div><div class="k">出門天數</div></div>
-      <div class="stat"><div class="v">${maxSpeed}<span class="unit">km/h</span></div><div class="k">最高速度</div></div>
+      <div class="poster-stats">
+        <div class="stat"><div class="v">${fmtKm(s.totalDistance)}<span class="unit">km</span></div><div class="k">總里程</div></div>
+        <div class="stat"><div class="v">${s.trackCount}</div><div class="k">趟數</div></div>
+        <div class="stat"><div class="v">${hours}<span class="unit">hr</span></div><div class="k">移動時間</div></div>
+        <div class="stat"><div class="v">${s.daysActive}</div><div class="k">出門天數</div></div>
+        <div class="stat"><div class="v">${maxSpeed}<span class="unit">km/h</span></div><div class="k">最高速度</div></div>
+      </div>
+      <div class="poster-footer">shield · review · ${s.trackCount} 條軌跡・${s.dateRange.spanDays ?? '?'} 天</div>
     </div>
     <div class="poster-map"></div>
-    <div class="poster-footer">shield · review · ${s.trackCount} 條軌跡・${s.dateRange.spanDays ?? '?'} 天</div>
   `;
   document.body.appendChild(poster);
 

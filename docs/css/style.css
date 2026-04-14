@@ -315,14 +315,7 @@ body.reel-mode .nav {
 .map-side .summary { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
 .map-side .summary .item {
   background: var(--bg-card); padding: 12px; border-radius: var(--radius-sm);
-  border-top: 3px solid;
 }
-/* Each summary card picks a palette colour so the row reads as a spectrum
-   instead of a wall of grey. Order matches the DOM from map.js renderSummary. */
-.map-side .summary .item:nth-child(1) { border-top-color: var(--accent); }
-.map-side .summary .item:nth-child(2) { border-top-color: var(--accent-2); }
-.map-side .summary .item:nth-child(3) { border-top-color: var(--accent-3); }
-.map-side .summary .item:nth-child(4) { border-top-color: var(--good); }
 .map-side .summary .item:nth-child(1) .v { color: var(--accent); }
 .map-side .summary .item:nth-child(2) .v { color: var(--accent-2); }
 .map-side .summary .item:nth-child(3) .v { color: var(--accent-3); }
@@ -379,66 +372,100 @@ body.reel-mode .nav {
 
 /* ========= MAP OVERVIEW POSTER (rendered off-screen, captured by html2canvas) =========
    The element is positioned at left: -99999px so it's laid out (height: auto,
-   flex works) but never visible. html2canvas rasterises it via its own clone. */
+   flex works) but never visible. html2canvas rasterises it via its own clone.
+   16:9 landscape — info panel on the left, map hero on the right. */
 .poster {
   position: fixed; left: -99999px; top: 0;
-  width: 1080px; height: 1350px;
-  background: #0a0a0f;
+  width: 1920px; height: 1080px;
+  background: radial-gradient(ellipse at top left, #1c1c2a 0%, #0a0a0f 55%);
   color: var(--fg);
   font-family: var(--font-body);
-  padding: 56px 56px 40px;
+  display: grid;
+  grid-template-columns: 680px 1fr;
   box-sizing: border-box;
-  display: flex; flex-direction: column;
-  gap: 28px;
 }
-.poster .poster-head { display: flex; flex-direction: column; gap: 14px; }
+.poster .poster-left {
+  padding: 56px 48px 40px;
+  display: flex; flex-direction: column;
+  gap: 32px;
+  border-right: 1px solid rgba(255,255,255,.06);
+  position: relative;
+}
+.poster .poster-left::before {
+  content: '';
+  position: absolute; top: 0; left: 48px; right: 48px;
+  height: 4px; border-radius: 0 0 4px 4px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent-3), var(--good));
+}
+.poster .poster-head { display: flex; flex-direction: column; gap: 20px; }
 .poster .brand-row { display: flex; justify-content: space-between; align-items: baseline; }
 .poster .brand {
   font-family: var(--font-display);
-  font-weight: 800; font-size: 24px; letter-spacing: -0.02em;
+  font-weight: 800; font-size: 26px; letter-spacing: -0.02em;
 }
 .poster .brand span { color: var(--accent); margin: 0 3px; }
-.poster .date-range { font-size: 20px; color: var(--fg-dim); }
+.poster .date-range { font-size: 18px; color: var(--fg-dim); }
 .poster h1 {
   font-family: var(--font-display);
-  font-size: 84px; font-weight: 900; letter-spacing: -0.03em;
-  line-height: 1.02;
+  font-size: 96px; font-weight: 900; letter-spacing: -0.03em;
+  line-height: 1.0;
   color: var(--accent);
 }
 .poster h1 .dim { color: var(--fg); }
 
-.poster-stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
-.poster-stats .stat {
-  background: var(--bg-elev);
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: var(--radius);
-  padding: 22px 14px;
-  text-align: center;
+.poster-stats {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  align-content: start;
 }
+.poster-stats .stat {
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.08);
+  border-left: 4px solid;
+  border-radius: var(--radius);
+  padding: 20px 22px;
+}
+.poster-stats .stat:nth-child(1) { grid-column: 1 / -1; padding: 26px 24px; }
+.poster-stats .stat:nth-child(1) { border-left-color: var(--accent); }
+.poster-stats .stat:nth-child(2) { border-left-color: var(--accent-2); }
+.poster-stats .stat:nth-child(3) { border-left-color: var(--accent-3); }
+.poster-stats .stat:nth-child(4) { border-left-color: var(--good); }
+.poster-stats .stat:nth-child(5) { border-left-color: #b28bff; }
+.poster-stats .stat:nth-child(1) .v { color: var(--accent); }
+.poster-stats .stat:nth-child(2) .v { color: var(--accent-2); }
+.poster-stats .stat:nth-child(3) .v { color: var(--accent-3); }
+.poster-stats .stat:nth-child(4) .v { color: var(--good); }
+.poster-stats .stat:nth-child(5) .v { color: #b28bff; }
 .poster-stats .v {
   font-family: var(--font-display);
-  font-size: 34px; font-weight: 800; color: var(--accent);
+  font-size: 36px; font-weight: 800;
   line-height: 1;
 }
+.poster-stats .stat:nth-child(1) .v { font-size: 60px; }
 .poster-stats .v .unit {
-  font-size: 14px; color: var(--fg-dim); margin-left: 4px; font-weight: 600;
+  font-size: 16px; color: var(--fg-dim); margin-left: 6px; font-weight: 600;
 }
+.poster-stats .stat:nth-child(1) .v .unit { font-size: 20px; }
 .poster-stats .k {
-  font-size: 12px; color: var(--fg-dim);
+  font-size: 13px; color: var(--fg-dim);
   text-transform: uppercase; letter-spacing: .1em;
-  margin-top: 8px;
+  margin-top: 10px;
 }
 
 .poster-map {
-  flex: 1; min-height: 0;
-  border-radius: var(--radius);
+  margin: 40px 40px 40px 28px;
+  border-radius: 20px;
   overflow: hidden;
-  border: 1px solid rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.1);
   background: #14141c;
+  box-shadow: 0 0 60px rgba(255,90,54,.1), 0 20px 60px rgba(0,0,0,.4);
 }
 .poster-footer {
-  text-align: center; color: var(--fg-dim);
+  color: var(--fg-dim);
   font-size: 14px; letter-spacing: .06em;
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,.06);
 }
 
 /* ========= EMPTY STATES ========= */
