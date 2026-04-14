@@ -186,7 +186,7 @@ async function saveCurrentSlide() {
 async function saveAllSlides() {
   if (typeof html2canvas === 'undefined') throw new Error('html2canvas 沒載入');
   if (typeof JSZip === 'undefined') throw new Error('JSZip 沒載入');
-  const slides = Array.from(document.querySelectorAll('.slide'));
+  const slides = Array.from(document.querySelectorAll('.slide:not(.no-save)'));
   if (slides.length === 0) throw new Error('沒有卡片');
 
   const scale = IS_MOBILE ? 1.5 : 2;
@@ -438,7 +438,7 @@ function slideTerritory(s) {
 }
 
 function slideOutro(s) {
-  const slide = el('section', 'slide tinted-1');
+  const slide = el('section', 'slide tinted-1 no-save');
   slide.innerHTML = `
     <div class="slide-inner">
       <div class="eyebrow">下一站</div>
