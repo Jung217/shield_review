@@ -376,13 +376,15 @@ body.reel-mode .nav {
    16:9 landscape — info panel on the left, map hero on the right. */
 .poster {
   position: fixed; left: -99999px; top: 0;
-  width: 1920px; height: 1080px;
   background: radial-gradient(ellipse at top left, #1c1c2a 0%, #0a0a0f 55%);
   color: var(--fg);
   font-family: var(--font-body);
+  box-sizing: border-box;
+}
+.poster.landscape {
+  width: 1920px; height: 1080px;
   display: grid;
   grid-template-columns: 680px 1fr;
-  box-sizing: border-box;
 }
 .poster .poster-left {
   padding: 56px 48px 40px;
@@ -466,6 +468,94 @@ body.reel-mode .nav {
   margin-top: auto;
   padding-top: 16px;
   border-top: 1px solid rgba(255,255,255,.06);
+}
+
+/* Portrait A — title+stats on top, map hero below. 1080×1920. */
+.poster.portrait-split {
+  width: 1080px; height: 1920px;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+.poster.portrait-split .poster-top {
+  padding: 56px 48px 28px;
+  display: flex; flex-direction: column; gap: 24px;
+  position: relative;
+}
+.poster.portrait-split .poster-top::before {
+  content: ''; position: absolute; top: 0; left: 48px; right: 48px;
+  height: 4px; border-radius: 0 0 4px 4px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent-3), var(--good));
+}
+.poster.portrait-split h1 { font-size: 84px; }
+.poster.portrait-split .poster-stats {
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+}
+.poster.portrait-split .poster-stats .stat { padding: 18px 16px; }
+.poster.portrait-split .poster-stats .stat:nth-child(1) { grid-column: auto; padding: 18px 16px; }
+.poster.portrait-split .poster-stats .v { font-size: 30px; }
+.poster.portrait-split .poster-stats .stat:nth-child(1) .v { font-size: 34px; }
+.poster.portrait-split .poster-stats .v .unit { font-size: 14px; }
+.poster.portrait-split .poster-stats .stat:nth-child(1) .v .unit { font-size: 16px; }
+.poster.portrait-split .poster-stats .k { font-size: 11px; margin-top: 8px; }
+.poster.portrait-split .poster-map {
+  margin: 8px 48px 16px;
+  border-radius: 20px; overflow: hidden;
+  border: 1px solid rgba(255,255,255,.1);
+  background: #14141c;
+  box-shadow: 0 0 60px rgba(255,90,54,.1), 0 20px 60px rgba(0,0,0,.4);
+}
+.poster.portrait-split .poster-footer {
+  margin: 0; padding: 16px 48px 28px;
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+
+/* Portrait B — map fills the canvas, stats float on a gradient band. 1080×1920. */
+.poster.portrait-fill {
+  width: 1080px; height: 1920px;
+  position: fixed; left: -99999px; top: 0;
+}
+.poster.portrait-fill .poster-map {
+  position: absolute; inset: 0;
+  margin: 0; border-radius: 0; border: none; box-shadow: none;
+  background: #14141c;
+}
+.poster.portrait-fill .poster-overlay-top {
+  position: absolute; top: 0; left: 0; right: 0;
+  padding: 56px 48px 140px;
+  background: linear-gradient(180deg, rgba(10,10,15,.92) 0%, rgba(10,10,15,.55) 55%, rgba(10,10,15,0) 100%);
+  display: flex; flex-direction: column; gap: 16px;
+  pointer-events: none;
+}
+.poster.portrait-fill .poster-overlay-top::before {
+  content: ''; position: absolute; top: 0; left: 48px; right: 48px;
+  height: 4px; border-radius: 0 0 4px 4px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent-3), var(--good));
+}
+.poster.portrait-fill h1 { font-size: 88px; }
+.poster.portrait-fill .poster-overlay-bottom {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 140px 40px 48px;
+  background: linear-gradient(0deg, rgba(10,10,15,.95) 0%, rgba(10,10,15,.7) 55%, rgba(10,10,15,0) 100%);
+  display: flex; flex-direction: column; gap: 18px;
+}
+.poster.portrait-fill .poster-stats {
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+.poster.portrait-fill .poster-stats .stat {
+  background: rgba(15,15,22,.72);
+  padding: 18px 14px;
+}
+.poster.portrait-fill .poster-stats .stat:nth-child(1) { grid-column: auto; padding: 18px 14px; }
+.poster.portrait-fill .poster-stats .v { font-size: 28px; }
+.poster.portrait-fill .poster-stats .stat:nth-child(1) .v { font-size: 32px; }
+.poster.portrait-fill .poster-stats .v .unit { font-size: 13px; }
+.poster.portrait-fill .poster-stats .stat:nth-child(1) .v .unit { font-size: 15px; }
+.poster.portrait-fill .poster-stats .k { font-size: 10px; margin-top: 6px; }
+.poster.portrait-fill .poster-footer {
+  margin: 0; padding: 0; border: none;
+  text-align: center;
 }
 
 /* ========= EMPTY STATES ========= */

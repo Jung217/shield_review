@@ -159,23 +159,41 @@ function addSavePosterFab() {
   fab.className = 'save-fab';
   fab.innerHTML = `
     <div class="toast"></div>
+    <div class="menu">
+      <button data-variant="landscape">🖥 橫式 16:9</button>
+      <button data-variant="portrait-split">📱 直式・上文下圖</button>
+      <button data-variant="portrait-fill">🌄 直式・地圖鋪滿</button>
+    </div>
     <button class="main-btn" title="存總覽圖">🗺️</button>
   `;
   document.body.appendChild(fab);
 
-  const btn = fab.querySelector('.main-btn');
+  const mainBtn = fab.querySelector('.main-btn');
+  const menu = fab.querySelector('.menu');
   const toast = fab.querySelector('.toast');
-  btn.addEventListener('click', async () => {
-    btn.disabled = true;
+
+  mainBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    fab.classList.toggle('open');
+  });
+  document.addEventListener('click', (e) => {
+    if (!fab.contains(e.target)) fab.classList.remove('open');
+  });
+  menu.addEventListener('click', async (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    fab.classList.remove('open');
+    const variant = btn.dataset.variant;
+    menu.querySelectorAll('button').forEach(b => b.disabled = true);
     showToast(toast, '產生總覽圖中⋯');
     try {
-      await savePoster();
+      await savePoster(variant);
       showToast(toast, '下載完成 ✓', 2000);
     } catch (err) {
       console.error(err);
       showToast(toast, `失敗：${err.message}`, 3500);
     } finally {
-      btn.disabled = false;
+      menu.querySelectorAll('button').forEach(b => b.disabled = false);
     }
   });
 }
@@ -187,7 +205,7 @@ function showToast(toast, msg, autohide = 0) {
   if (autohide) toast._t = setTimeout(() => toast.classList.remove('show'), autohide);
 }
 
-async function savePoster() {
+async function savePoster(variant = 'landscape') {
   if (typeof html2canvas === 'undefined') throw new Error('html2canvas 沒載入');
   if (!summary) throw new Error('沒有資料');
   const s = summary;
@@ -197,28 +215,56 @@ async function savePoster() {
   const dateStart = s.dateRange.start ? fmtDate(s.dateRange.start) : '';
   const dateEnd = s.dateRange.end ? fmtDate(s.dateRange.end) : '';
 
+  const brandRow = `
+    <div class="brand-row">
+      <div class="brand">Shield<span>·</span>Review</div>
+      <div class="date-range">${escapeHtml(dateStart)} → ${escapeHtml(dateEnd)}</div>
+    </div>`;
+  const title = `<h1>你的<span class="dim">軌跡</span>總覽</h1>`;
+  const statsBlock = `
+    <div class="poster-stats">
+      <div class="stat"><div class="v">${fmtKm(s.totalDistance)}<span class="unit">km</span></div><div class="k">總里程</div></div>
+      <div class="stat"><div class="v">${s.trackCount}</div><div class="k">趟數</div></div>
+      <div class="stat"><div class="v">${hours}<span class="unit">hr</span></div><div class="k">移動時間</div></div>
+      <div class="stat"><div class="v">${s.daysActive}</div><div class="k">出門天數</div></div>
+      <div class="stat"><div class="v">${maxSpeed}<span class="unit">km/h</span></div><div class="k">最高速度</div></div>
+    </div>`;
+  const footer = `<div class="poster-footer">shield · review · ${s.trackCount} 條軌跡・${s.dateRange.spanDays ?? '?'} 天</div>`;
+
   const poster = document.createElement('div');
-  poster.className = 'poster';
-  poster.innerHTML = `
-    <div class="poster-left">
-      <div class="poster-head">
-        <div class="brand-row">
-          <div class="brand">Shield<span>·</span>Review</div>
-          <div class="date-range">${escapeHtml(dateStart)} → ${escapeHtml(dateEnd)}</div>
-        </div>
-        <h1>你的<span class="dim">軌跡</span>總覽</h1>
+  poster.className = `poster ${variant}`;
+  if (variant === 'landscape') {
+    poster.innerHTML = `
+      <div class="poster-left">
+        <div class="poster-head">${brandRow}${title}</div>
+        ${statsBlock}
+        ${footer}
       </div>
-      <div class="poster-stats">
-        <div class="stat"><div class="v">${fmtKm(s.totalDistance)}<span class="unit">km</span></div><div class="k">總里程</div></div>
-        <div class="stat"><div class="v">${s.trackCount}</div><div class="k">趟數</div></div>
-        <div class="stat"><div class="v">${hours}<span class="unit">hr</span></div><div class="k">移動時間</div></div>
-        <div class="stat"><div class="v">${s.daysActive}</div><div class="k">出門天數</div></div>
-        <div class="stat"><div class="v">${maxSpeed}<span class="unit">km/h</span></div><div class="k">最高速度</div></div>
+      <div class="poster-map"></div>
+    `;
+  } else if (variant === 'portrait-split') {
+    poster.innerHTML = `
+      <div class="poster-top">
+        <div class="poster-head">${brandRow}${title}</div>
+        ${statsBlock}
       </div>
-      <div class="poster-footer">shield · review · ${s.trackCount} 條軌跡・${s.dateRange.spanDays ?? '?'} 天</div>
-    </div>
-    <div class="poster-map"></div>
-  `;
+      <div class="poster-map"></div>
+      ${footer}
+    `;
+  } else if (variant === 'portrait-fill') {
+    poster.innerHTML = `
+      <div class="poster-map"></div>
+      <div class="poster-overlay-top">
+        <div class="poster-head">${brandRow}${title}</div>
+      </div>
+      <div class="poster-overlay-bottom">
+        ${statsBlock}
+        ${footer}
+      </div>
+    `;
+  } else {
+    throw new Error(`unknown variant: ${variant}`);
+  }
   document.body.appendChild(poster);
 
   // Build a fresh Leaflet map inside the poster so we don't disturb the live
@@ -253,17 +299,44 @@ async function savePoster() {
     // <canvas>). We render the map ourselves via getBoundingClientRect (which
     // sees post-transform positions) and stamp it onto the html2canvas output.
     const mapCanvas = renderLeafletToCanvas(mapEl, scale);
+    // For portrait-fill the overlays have to sit *on top of* the map, so we
+    // render the poster with a transparent background and composite map-first.
+    const isFill = variant === 'portrait-fill';
     const posterCanvas = await html2canvas(poster, {
-      backgroundColor: '#0a0a0f',
+      backgroundColor: isFill ? null : '#0a0a0f',
       scale, useCORS: true, allowTaint: false, logging: false,
+      onclone(doc) {
+        if (!isFill) return;
+        const p = doc.querySelector('.poster.portrait-fill');
+        if (p) p.style.setProperty('background', 'none', 'important');
+        const mapDiv = doc.querySelector('.poster.portrait-fill .poster-map');
+        if (mapDiv) mapDiv.style.setProperty('background', 'none', 'important');
+      },
     });
     const mapRect = mapEl.getBoundingClientRect();
     const posterRect = poster.getBoundingClientRect();
     const mapX = Math.round((mapRect.left - posterRect.left) * scale);
     const mapY = Math.round((mapRect.top - posterRect.top) * scale);
-    posterCanvas.getContext('2d').drawImage(mapCanvas, mapX, mapY);
 
-    await downloadCanvas(posterCanvas, 'shield-review-overview.png');
+    let finalCanvas;
+    if (isFill) {
+      finalCanvas = document.createElement('canvas');
+      finalCanvas.width = posterCanvas.width;
+      finalCanvas.height = posterCanvas.height;
+      const fctx = finalCanvas.getContext('2d');
+      fctx.fillStyle = '#0a0a0f';
+      fctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+      fctx.drawImage(mapCanvas, mapX, mapY);
+      fctx.drawImage(posterCanvas, 0, 0);
+    } else {
+      posterCanvas.getContext('2d').drawImage(mapCanvas, mapX, mapY);
+      finalCanvas = posterCanvas;
+    }
+
+    const fname = variant === 'landscape' ? 'shield-review-overview.png'
+                : variant === 'portrait-split' ? 'shield-review-overview-portrait.png'
+                : 'shield-review-overview-fill.png';
+    await downloadCanvas(finalCanvas, fname);
   } finally {
     pmap.remove();
     poster.remove();
