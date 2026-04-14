@@ -122,8 +122,11 @@ function currentSlideIndex() {
   return best;
 }
 
-// Base options. Scale is per-call because "save all" stitches 12 slides into
-// one tall canvas and iOS Safari caps canvas area near 16 Mpx.
+// Export cards at a fixed 9:16 canvas so all slides come out identical
+// regardless of the viewer's viewport.
+const EXPORT_W = 1080;
+const EXPORT_H = 1920;
+
 function h2cOpts(scale) {
   return {
     backgroundColor: '#0a0a0f',
@@ -131,17 +134,32 @@ function h2cOpts(scale) {
     useCORS: true,
     allowTaint: false,
     logging: false,
-    // Only the cloned DOM is mutated, so the live page never flickers.
-    // html2canvas can't render `background-clip: text`, which would turn our
-    // gradient numbers into solid rectangles. We flatten those to a plain color
-    // *inline* (class-based CSS sometimes loses specificity fights inside the
-    // clone), and also hide chrome like the FAB and nav.
+    width: EXPORT_W,
+    height: EXPORT_H,
+    windowWidth: EXPORT_W,
+    windowHeight: EXPORT_H,
     onclone(clonedDoc) {
       clonedDoc.body.classList.add('capturing');
       clonedDoc.body.classList.remove('reel-mode');
+      const target = clonedDoc.querySelector('[data-export-target="1"]');
+      if (target) {
+        target.style.setProperty('width', EXPORT_W + 'px', 'important');
+        target.style.setProperty('height', EXPORT_H + 'px', 'important');
+        target.style.setProperty('min-height', EXPORT_H + 'px', 'important');
+        target.style.setProperty('box-sizing', 'border-box', 'important');
+      }
       flattenForCapture(clonedDoc);
     },
   };
+}
+
+async function captureSlide(slide, scale) {
+  slide.setAttribute('data-export-target', '1');
+  try {
+    return await html2canvas(slide, h2cOpts(scale));
+  } finally {
+    slide.removeAttribute('data-export-target');
+  }
 }
 
 function flattenForCapture(doc) {
@@ -177,7 +195,7 @@ async function saveCurrentSlide() {
   if (!slide) throw new Error('找不到卡片');
 
   const scale = IS_MOBILE ? 1.5 : 2;
-  const canvas = await html2canvas(slide, h2cOpts(scale));
+  const canvas = await captureSlide(slide, scale);
   await downloadCanvas(canvas, `shield-review-${String(idx+1).padStart(2,'0')}.png`);
 }
 
@@ -190,7 +208,7 @@ async function saveAllSlides() {
   const scale = IS_MOBILE ? 1.5 : 2;
   const zip = new JSZip();
   for (let i = 0; i < slides.length; i++) {
-    const c = await html2canvas(slides[i], h2cOpts(scale));
+    const c = await captureSlide(slides[i], scale);
     const blob = await new Promise((resolve, reject) =>
       c.toBlob(b => b ? resolve(b) : reject(new Error('轉 PNG 失敗')), 'image/png')
     );
