@@ -1,18 +1,51 @@
 # Shield Review
 
-> 緣起，看到手機會出的紀錄，想起原本想搞這個，僅此
+> 緣起：看到手機匯出的神盾的紀錄，想起原本想搞這個，謹此
 
-把 神盾測速照相 匯出的 GPX 軌跡壓縮檔變成一份大字卡片式的回顧。
-**純前端、純靜態、零伺服器** — 紀錄完全留在你的瀏覽器。
+把 神盾測速照相 匯出的 GPX 軌跡壓縮檔變成一份卡片式的回顧。
+**純前端、純靜態、零伺服器** — 紀錄只留在本地瀏覽器。
 
 [Try it !](https://jung217.github.io/shield_review/)
+
+## 預覽
+
+地圖總覽海報：
+
+<p align="center">
+  <img src="public/shield-review-overview.png" alt="地圖總覽" width="100%"/>
+</p>
+
+大字卡片回顧：
+
+<table>
+  <tr>
+    <td width="50%"><img src="public/shield-review-01.png" alt="01"/></td>
+    <td width="50%"><img src="public/shield-review-02.png" alt="02"/></td>
+  </tr>
+  <tr>
+    <td><img src="public/shield-review-03.png" alt="03"/></td>
+    <td><img src="public/shield-review-04.png" alt="04"/></td>
+  </tr>
+  <tr>
+    <td><img src="public/shield-review-05.png" alt="05"/></td>
+    <td><img src="public/shield-review-06.png" alt="06"/></td>
+  </tr>
+  <tr>
+    <td><img src="public/shield-review-07.png" alt="07"/></td>
+    <td><img src="public/shield-review-08.png" alt="08"/></td>
+  </tr>
+  <tr>
+    <td><img src="public/shield-review-09.png" alt="09"/></td>
+    <td><img src="public/shield-review-10.png" alt="10"/></td>
+  </tr>
+</table>
 
 ## 它能做什麼
 
 把 `share_track_*.zip` 丟進去之後：
 
-- **回顧頁**（大字卡片、滑動切換）：總公里、總時數、出門天數、最長連續紀錄、熱門時段／星期、月度趨勢、最快速度、最長一趟、最早 / 最晚出門、覆蓋面積，每張都能存成圖片
-- **地圖頁**：所有軌跡疊圖、線路 / 熱力切換、點軌跡看細節
+- **回顧頁**（大字卡片、滑動切換）：總公里、總時數、趟數、熱門時段／星期、月度趨勢、最快速度、最長一趟、最早 / 最晚出門，每張都能存成圖片
+- **地圖頁**：所有軌跡疊圖、線路 / 熱力切換、點軌跡看細節、整份總覽存成海報
 - **本機解析**：JSZip + DOMParser 都在瀏覽器跑，IndexedDB 緩存
 
 ## 在你電腦本機測
@@ -33,6 +66,7 @@ docs/
 ├── dashboard.html    大字卡片回顧
 ├── map.html          Leaflet 地圖
 ├── demo.zip          示範資料（369 條軌跡）
+├── favicon.svg       網頁 icon
 ├── css/style.css
 └── js/
     ├── app.js          上傳 → 解析 → 緩存 → 跳轉
@@ -48,6 +82,7 @@ docs/
 
 - [JSZip](https://stuk.github.io/jszip/) — 解 zip
 - [Leaflet](https://leafletjs.com/) + [Leaflet.heat](https://github.com/Leaflet/Leaflet.heat) — 地圖跟熱力
+- [html2canvas](https://html2canvas.hertzen.com/) — 卡片 / 海報存圖
 - 地圖底圖：[CARTO Dark](https://carto.com/attributions)（OSM）
 
 ## 隱私
