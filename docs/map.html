@@ -40,7 +40,15 @@
         <button class="toggle" data-mode="heat">熱力</button>
       </div>
 
-      <h3 id="trackHeader">軌跡（0）</h3>
+      <h3 id="trackHeader">
+        <span id="trackHeaderText">軌跡（0）</span>
+        <span class="info-tip" tabindex="0" aria-label="時間說明">
+          <span class="info-ico">!</span>
+          <span class="info-pop">
+            時間取自 GPX 內第一個 GPS 定位點，可能比神盾測速顯示的開始時間晚數秒至數十秒（等待衛星定位的延遲）。顯示精度到分鐘。
+          </span>
+        </span>
+      </h3>
       <div class="track-list" id="trackList"></div>
     </aside>
     <div id="leaflet-map"></div>

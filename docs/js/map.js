@@ -35,7 +35,27 @@ const IS_MOBILE =
   initMap(summary);
   bindToggles();
   addSavePosterFab();
+  bindInfoTips();
 })();
+
+function bindInfoTips() {
+  document.querySelectorAll('.info-tip').forEach(tip => {
+    const pop = tip.querySelector('.info-pop');
+    if (!pop) return;
+    const place = () => {
+      const r = tip.getBoundingClientRect();
+      const popW = pop.offsetWidth || 240;
+      let left = r.left + r.width / 2 - popW / 2;
+      left = Math.max(8, Math.min(left, window.innerWidth - popW - 8));
+      pop.style.top = `${r.bottom + 6}px`;
+      pop.style.left = `${left}px`;
+    };
+    tip.addEventListener('mouseenter', place);
+    tip.addEventListener('focus', place);
+    window.addEventListener('scroll', place, true);
+    window.addEventListener('resize', place);
+  });
+}
 
 function renderSummary(s) {
   summaryBox.innerHTML = `
@@ -47,7 +67,9 @@ function renderSummary(s) {
 }
 
 function renderTrackList(tracks) {
-  trackHeader.textContent = `軌跡（${tracks.length}）`;
+  const textEl = document.getElementById('trackHeaderText');
+  if (textEl) textEl.textContent = `軌跡（${tracks.length}）`;
+  else trackHeader.textContent = `軌跡（${tracks.length}）`;
   // Reverse so newest is on top
   const items = [...tracks].reverse();
   trackListEl.innerHTML = items.map((t, i) => {
