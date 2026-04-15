@@ -7,14 +7,30 @@ const MOVING_SPEED_KMH = 2;       // below this, treat as stopped
 const MAX_GAP_SEC = 30;           // gap longer than this = paused
 const SPEED_OUTLIER_KMH = 250;    // ignore impossible GPS jumps
 
-// RunningFree exports stamp local (UTC+8) time but mislabel it with a trailing "Z".
-// Strip the bogus "Z" so new Date() treats it as local, otherwise displayed times
-// end up 8 hours ahead on UTC+8 browsers.
-function parseTrackpointTime(text) {
+// RunningFree Android exports stamp real UTC in <time>...Z. iOS exports mislabel
+// local time with the same trailing "Z", which shows up 8h off after parsing.
+// Detect by comparing the UTC instant of the first <time> against the UTC instant
+// the filename represents (filename is local wall-clock). If those two instants
+// are far apart (~ timezone offset), the <time>Z is a lie and we should parse it
+// as local instead.
+function parseTrackpointTimeRaw(text) {
   if (!text) return null;
-  const cleaned = text.replace(/Z$/, '');
-  const d = new Date(cleaned);
+  const d = new Date(text);
   return isNaN(d) ? null : d;
+}
+function parseTrackpointTimeAsLocal(text) {
+  if (!text) return null;
+  const d = new Date(text.replace(/Z$/, ''));
+  return isNaN(d) ? null : d;
+}
+function detectLocalMislabel(firstTimeText, filename) {
+  if (!firstTimeText) return false;
+  const fnTime = parseFilenameTime(filename);
+  const utcTime = parseTrackpointTimeRaw(firstTimeText);
+  if (!fnTime || !utcTime) return false;
+  const diffH = Math.abs(utcTime.getTime() - fnTime.getTime()) / 3600000;
+  // ≥ 4h apart ⇒ the Z is wrong (Apple case). Near-zero ⇒ genuine UTC (Android).
+  return diffH >= 4;
 }
 
 const parser = new DOMParser();
@@ -50,6 +66,11 @@ export function parseGPX(xmlText, filename) {
   const trkptNodes = doc.getElementsByTagName('trkpt');
   if (trkptNodes.length === 0) return null;
 
+  const firstTimeEl = trkptNodes[0].getElementsByTagName('time')[0];
+  const firstTimeText = firstTimeEl ? firstTimeEl.textContent : null;
+  const useLocal = detectLocalMislabel(firstTimeText, filename);
+  const parseTime = useLocal ? parseTrackpointTimeAsLocal : parseTrackpointTimeRaw;
+
   const points = [];
   for (let i = 0; i < trkptNodes.length; i++) {
     const n = trkptNodes[i];
@@ -62,7 +83,7 @@ export function parseGPX(xmlText, filename) {
     const speedEl = n.getElementsByTagName('speed')[0];
 
     const ele = eleEl ? parseFloat(eleEl.textContent) : null;
-    const time = timeEl ? parseTrackpointTime(timeEl.textContent) : null;
+    const time = timeEl ? parseTime(timeEl.textContent) : null;
     const speed = speedEl ? parseFloat(speedEl.textContent) : null; // km/h per source
 
     points.push({ lat, lon, ele, time, speed });
