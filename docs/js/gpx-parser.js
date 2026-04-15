@@ -6,14 +6,6 @@ const R_EARTH_M = 6371000;
 const MOVING_SPEED_KMH = 2;       // below this, treat as stopped
 const MAX_GAP_SEC = 30;           // gap longer than this = paused
 const SPEED_OUTLIER_KMH = 250;    // ignore impossible GPS jumps
-const UTC8_OFFSET_MS = 8 * 60 * 60 * 1000; // GPX times are UTC; shift to UTC+8 for display
-
-function parseTrackpointTime(text) {
-  if (!text) return null;
-  const d = new Date(text);
-  if (isNaN(d)) return null;
-  return new Date(d.getTime() + UTC8_OFFSET_MS);
-}
 
 const parser = new DOMParser();
 
@@ -60,7 +52,7 @@ export function parseGPX(xmlText, filename) {
     const speedEl = n.getElementsByTagName('speed')[0];
 
     const ele = eleEl ? parseFloat(eleEl.textContent) : null;
-    const time = timeEl ? parseTrackpointTime(timeEl.textContent) : null;
+    const time = timeEl ? new Date(timeEl.textContent) : null;
     const speed = speedEl ? parseFloat(speedEl.textContent) : null; // km/h per source
 
     points.push({ lat, lon, ele, time, speed });
