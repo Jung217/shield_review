@@ -7,6 +7,16 @@ const MOVING_SPEED_KMH = 2;       // below this, treat as stopped
 const MAX_GAP_SEC = 30;           // gap longer than this = paused
 const SPEED_OUTLIER_KMH = 250;    // ignore impossible GPS jumps
 
+// RunningFree exports stamp local (UTC+8) time but mislabel it with a trailing "Z".
+// Strip the bogus "Z" so new Date() treats it as local, otherwise displayed times
+// end up 8 hours ahead on UTC+8 browsers.
+function parseTrackpointTime(text) {
+  if (!text) return null;
+  const cleaned = text.replace(/Z$/, '');
+  const d = new Date(cleaned);
+  return isNaN(d) ? null : d;
+}
+
 const parser = new DOMParser();
 
 function haversine(lat1, lon1, lat2, lon2) {
@@ -52,7 +62,7 @@ export function parseGPX(xmlText, filename) {
     const speedEl = n.getElementsByTagName('speed')[0];
 
     const ele = eleEl ? parseFloat(eleEl.textContent) : null;
-    const time = timeEl ? new Date(timeEl.textContent) : null;
+    const time = timeEl ? parseTrackpointTime(timeEl.textContent) : null;
     const speed = speedEl ? parseFloat(speedEl.textContent) : null; // km/h per source
 
     points.push({ lat, lon, ele, time, speed });
